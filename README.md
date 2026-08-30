@@ -51,7 +51,7 @@ The reported range for each anchor is the 5th to 95th percentile of the simulate
 
 ## Results (baseline, generated 2026-08-30 15:32 UTC)
 
-Full artefact: [`results/baseline_prediction.md`](results/baseline_prediction.md)
+Full artefact: [`results/baseline_prediction.md`](results/baseline_prediction.md). The artefact was regenerated once at 16:42 UTC the same day, pre-race, to correct the interval labelling; the values are unchanged and no further regeneration will happen before the calibration step.
 
 | Anchor | Point (Riegel, b = 1.06) | Monte Carlo range |
 |---|---|---|
