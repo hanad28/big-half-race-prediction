@@ -43,24 +43,8 @@ def build_predictions() -> list[PredictionRange]:
     ]
 
 
-def write_artefact(
-    ranges: list[PredictionRange],
-    output_path: Path = BASELINE_ARTEFACT_PATH,
-) -> Path:
-    """Write the baseline prediction as a standalone timestamped document.
-
-    The artefact is a one-off, pre-race record: it must only ever be
-    created once. Later calibration steps belong in their own script
-    writing their own artefact, so refuse to overwrite an existing file.
-    """
-    if output_path.exists():
-        raise FileExistsError(
-            f"Baseline artefact already exists at {output_path}. It is a "
-            "one-off timestamped record and must not be regenerated; add "
-            "any later calibration as a separate artefact."
-        )
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+def render_artefact(ranges: list[PredictionRange], generated_at: str) -> str:
+    """Render the baseline artefact document as markdown text."""
     overall_low, overall_high = combined_range(ranges)
 
     lines = [
@@ -90,9 +74,50 @@ def write_artefact(
         "See the README for method, why the two anchors diverge, and "
         "limitations.",
     ]
-    output_path.write_text("\n".join(lines) + "\n")
+    return "\n".join(lines) + "\n"
+
+
+def write_artefact(
+    ranges: list[PredictionRange],
+    output_path: Path = BASELINE_ARTEFACT_PATH,
+) -> Path:
+    """Write the baseline prediction as a standalone timestamped document.
+
+    The artefact is a one-off, pre-race record: it must only ever be
+    created once. Later calibration steps belong in their own script
+    writing their own artefact, so refuse to overwrite an existing file.
+    """
+    if output_path.exists():
+        raise FileExistsError(
+            f"Baseline artefact already exists at {output_path}. It is a "
+            "one-off timestamped record and must not be regenerated; add "
+            "any later calibration as a separate artefact."
+        )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    output_path.write_text(render_artefact(ranges, generated_at))
     logger.info("Wrote baseline artefact to %s", output_path)
     return output_path
+
+
+def _without_timestamp_line(document: str) -> str:
+    return "\n".join(
+        line for line in document.splitlines() if not line.startswith("Generated:")
+    )
+
+
+def check_against_committed(
+    ranges: list[PredictionRange],
+    artefact_path: Path = BASELINE_ARTEFACT_PATH,
+) -> bool:
+    """Compare freshly recomputed values against the committed artefact.
+
+    Ignores the generation timestamp line; the Monte Carlo is seeded, so
+    recomputed values should match the committed ones exactly.
+    """
+    committed = _without_timestamp_line(artefact_path.read_text())
+    recomputed = _without_timestamp_line(render_artefact(ranges, generated_at=""))
+    return committed == recomputed
 
 
 def main() -> None:
@@ -106,9 +131,23 @@ def main() -> None:
             format_hms(prediction.low_s),
             format_hms(prediction.high_s),
         )
-    write_artefact(ranges)
     chart_path = plot_prediction_comparison(ranges)
     logger.info("Wrote chart to %s", chart_path)
+    if BASELINE_ARTEFACT_PATH.exists():
+        if check_against_committed(ranges):
+            logger.info(
+                "Baseline artefact already exists at %s; skipped writing. "
+                "Recomputed values MATCH the committed artefact.",
+                BASELINE_ARTEFACT_PATH,
+            )
+        else:
+            logger.warning(
+                "Baseline artefact already exists at %s; skipped writing. "
+                "Recomputed values DO NOT MATCH the committed artefact.",
+                BASELINE_ARTEFACT_PATH,
+            )
+    else:
+        write_artefact(ranges)
 
 
 if __name__ == "__main__":

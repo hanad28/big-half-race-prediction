@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from big_half.baseline import build_predictions, write_artefact
+from big_half.baseline import build_predictions, check_against_committed, write_artefact
 from big_half.data_loading import Effort, load_runs, longest_run_effort
 from big_half.prediction import combined_range, point_prediction, predict_with_uncertainty
 
@@ -50,6 +50,15 @@ def test_write_artefact_refuses_to_overwrite(tmp_path: Path) -> None:
     write_artefact(ranges, output_path=target)
     with pytest.raises(FileExistsError):
         write_artefact(ranges, output_path=target)
+
+
+def test_check_against_committed(tmp_path: Path) -> None:
+    ranges = build_predictions()
+    target = tmp_path / "baseline_prediction.md"
+    write_artefact(ranges, output_path=target)
+    assert check_against_committed(ranges, artefact_path=target)
+    target.write_text(target.read_text().replace("1:47", "1:00"))
+    assert not check_against_committed(ranges, artefact_path=target)
 
 
 def test_load_runs_and_longest_run() -> None:
