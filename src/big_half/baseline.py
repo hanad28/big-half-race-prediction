@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from big_half.charts import plot_prediction_comparison
+from big_half.charts import FIGURES_DIR, plot_prediction_comparison
 from big_half.data_loading import RUNS_CSV_PATH, Effort, load_runs, longest_run_effort
 from big_half.prediction import (
     HALF_MARATHON_KM,
@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
 BASELINE_ARTEFACT_PATH = RESULTS_DIR / "baseline_prediction.md"
+BASELINE_CHART_PATH = FIGURES_DIR / "baseline_comparison.png"
 
 # Strava's estimated fastest 5k effort (23m35s), from athlete_context.md.
 # A best-effort extraction from within training runs, not a standalone race.
@@ -131,23 +132,31 @@ def main() -> None:
             format_hms(prediction.low_s),
             format_hms(prediction.high_s),
         )
-    chart_path = plot_prediction_comparison(ranges)
-    logger.info("Wrote chart to %s", chart_path)
-    if BASELINE_ARTEFACT_PATH.exists():
-        if check_against_committed(ranges):
+    # The markdown artefact and the chart form one atomic artefact set:
+    # either both are written together on first generation, or neither
+    # is touched, so the frozen text and chart can never contradict.
+    if BASELINE_ARTEFACT_PATH.exists() or BASELINE_CHART_PATH.exists():
+        if not BASELINE_ARTEFACT_PATH.exists():
+            logger.warning(
+                "Chart exists but the markdown artefact is missing; the "
+                "artefact set is incomplete and nothing was written. "
+                "Restore the committed set from version control."
+            )
+        elif check_against_committed(ranges):
             logger.info(
-                "Baseline artefact already exists at %s; skipped writing. "
-                "Recomputed values MATCH the committed artefact.",
-                BASELINE_ARTEFACT_PATH,
+                "Baseline artefact set already exists; nothing written. "
+                "Recomputed values MATCH the committed artefact (the chart "
+                "renders these same values)."
             )
         else:
             logger.warning(
-                "Baseline artefact already exists at %s; skipped writing. "
-                "Recomputed values DO NOT MATCH the committed artefact.",
-                BASELINE_ARTEFACT_PATH,
+                "Baseline artefact set already exists; nothing written. "
+                "Recomputed values DO NOT MATCH the committed artefact."
             )
     else:
         write_artefact(ranges)
+        chart_path = plot_prediction_comparison(ranges, output_path=BASELINE_CHART_PATH)
+        logger.info("Wrote chart to %s", chart_path)
 
 
 if __name__ == "__main__":
