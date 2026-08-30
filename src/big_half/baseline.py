@@ -47,7 +47,18 @@ def write_artefact(
     ranges: list[PredictionRange],
     output_path: Path = BASELINE_ARTEFACT_PATH,
 ) -> Path:
-    """Write the baseline prediction as a standalone timestamped document."""
+    """Write the baseline prediction as a standalone timestamped document.
+
+    The artefact is a one-off, pre-race record: it must only ever be
+    created once. Later calibration steps belong in their own script
+    writing their own artefact, so refuse to overwrite an existing file.
+    """
+    if output_path.exists():
+        raise FileExistsError(
+            f"Baseline artefact already exists at {output_path}. It is a "
+            "one-off timestamped record and must not be regenerated; add "
+            "any later calibration as a separate artefact."
+        )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     overall_low, overall_high = combined_range(ranges)
@@ -63,7 +74,7 @@ def write_artefact(
         "Any later calibration will be added as a separate step, not by "
         "editing this file.",
         "",
-        "| Anchor | Point (Riegel, b = 1.06) | 90% range |",
+        "| Anchor | Point (Riegel, b = 1.06) | Monte Carlo range (5th-95th percentile, under stated assumptions) |",
         "|---|---|---|",
     ]
     for prediction in ranges:
@@ -89,7 +100,7 @@ def main() -> None:
     ranges = build_predictions()
     for prediction in ranges:
         logger.info(
-            "%s -> point %s, 90%% range %s to %s",
+            "%s -> point %s, Monte Carlo range %s to %s",
             prediction.anchor.label,
             format_hms(prediction.point_s),
             format_hms(prediction.low_s),

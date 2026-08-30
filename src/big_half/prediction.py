@@ -30,12 +30,18 @@ LONG_ANCHOR_EFFORT_SCALE_LOW: float = 0.90
 LONG_ANCHOR_EFFORT_SCALE_HIGH: float = 1.00
 
 MONTE_CARLO_DRAWS: int = 20_000
-PREDICTION_INTERVAL_QUANTILES: tuple[float, float] = (0.05, 0.95)
+
+# Quantiles of the Monte Carlo output reported as the prediction range.
+# The inputs are subjective uniform bounds on the assumptions, so this is
+# a scenario range under stated assumptions, not a calibrated confidence
+# interval derived from observed sampling uncertainty.
+MONTE_CARLO_RANGE_QUANTILES: tuple[float, float] = (0.05, 0.95)
 
 
 @dataclass(frozen=True)
 class PredictionRange:
-    """A point prediction with a 90% Monte Carlo interval, in seconds."""
+    """A point prediction with a Monte Carlo range (5th-95th percentile
+    under stated assumptions), in seconds."""
 
     anchor: Effort
     point_s: float
@@ -80,7 +86,7 @@ def predict_with_uncertainty(
     else:
         scale_low, scale_high = LONG_ANCHOR_EFFORT_SCALE_LOW, LONG_ANCHOR_EFFORT_SCALE_HIGH
     samples = _monte_carlo_times(anchor, scale_low, scale_high, rng, target_km)
-    low_q, high_q = PREDICTION_INTERVAL_QUANTILES
+    low_q, high_q = MONTE_CARLO_RANGE_QUANTILES
     return PredictionRange(
         anchor=anchor,
         point_s=point_prediction(anchor, target_km),

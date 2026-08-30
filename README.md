@@ -47,13 +47,13 @@ With n = 11 there is nothing to bootstrap in the usual sense, so the uncertainty
 - **5k anchor time:** scaled by 0.98 to 1.04, because Strava's estimate is a best-effort extraction from within training runs, not a standalone time trial.
 - **Long-run effort:** scaled by 0.90 to 1.00, reflecting that a race effort over 15 km would plausibly be up to 10% faster than the logged steady training time.
 
-The reported range for each anchor is the 5th to 95th percentile of the simulated times.
+The reported range for each anchor is the 5th to 95th percentile of the simulated times. To be clear about what that is: the inputs are subjective uniform bounds on the assumptions, so this is a Monte Carlo range under stated assumptions, not a calibrated confidence interval derived from observed sampling uncertainty. It says "if the assumptions are in these ranges, the finish time lands here", nothing stronger.
 
 ## Results (baseline, generated 2026-08-30 15:32 UTC)
 
 Full artefact: [`results/baseline_prediction.md`](results/baseline_prediction.md)
 
-| Anchor | Point (Riegel, b = 1.06) | 90% range |
+| Anchor | Point (Riegel, b = 1.06) | Monte Carlo range |
 |---|---|---|
 | Fastest 5k effort (23:35) | 1:48:29 | 1:47:00 to 1:57:04 |
 | Longest training run (15.04 km) | 2:07:22 | 1:55:48 to 2:07:26 |

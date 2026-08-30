@@ -1,3 +1,8 @@
+from pathlib import Path
+
+import pytest
+
+from big_half.baseline import build_predictions, write_artefact
 from big_half.data_loading import Effort, load_runs, longest_run_effort
 from big_half.prediction import combined_range, point_prediction, predict_with_uncertainty
 
@@ -37,6 +42,14 @@ def test_combined_range_is_union() -> None:
     low, high = combined_range([fast, slow])
     assert low == min(fast.low_s, slow.low_s)
     assert high == max(fast.high_s, slow.high_s)
+
+
+def test_write_artefact_refuses_to_overwrite(tmp_path: Path) -> None:
+    ranges = build_predictions()
+    target = tmp_path / "baseline_prediction.md"
+    write_artefact(ranges, output_path=target)
+    with pytest.raises(FileExistsError):
+        write_artefact(ranges, output_path=target)
 
 
 def test_load_runs_and_longest_run() -> None:
