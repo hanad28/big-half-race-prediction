@@ -29,6 +29,14 @@ FAST_ANCHOR_TIME_SCALE_HIGH: float = 1.04
 LONG_ANCHOR_EFFORT_SCALE_LOW: float = 0.90
 LONG_ANCHOR_EFFORT_SCALE_HIGH: float = 1.00
 
+# The final 10 km run was a deliberate progression: comfortable early,
+# built to near race effort through km 7-9 (HR 167-177), easing in km 10.
+# Part of the run was already at race intensity, so the plausible gap
+# between a race effort and the logged time is smaller than for the
+# steady 15 km long run: up to 5% faster, rather than up to 10%.
+PROGRESSION_ANCHOR_EFFORT_SCALE_LOW: float = 0.95
+PROGRESSION_ANCHOR_EFFORT_SCALE_HIGH: float = 1.00
+
 MONTE_CARLO_DRAWS: int = 20_000
 
 # Quantiles of the Monte Carlo output reported as the prediction range.
@@ -72,16 +80,22 @@ def predict_with_uncertainty(
     is_maximal_effort: bool,
     target_km: float = HALF_MARATHON_KM,
     seed: int = 42,
+    effort_scale_bounds: tuple[float, float] | None = None,
 ) -> PredictionRange:
     """Monte Carlo prediction range over plausible exponent and effort values.
 
     Maximal-effort anchors (a best 5k) get a small symmetric time
     uncertainty; sub-maximal anchors (a steady long run) get a downward
     effort adjustment, since a race over the anchor distance would be
-    faster than the logged training time.
+    faster than the logged training time. Anchors that sit between the
+    two, such as a progression run partly at race effort, can pass
+    explicit bounds via effort_scale_bounds, overriding the
+    is_maximal_effort defaults.
     """
     rng = np.random.default_rng(seed)
-    if is_maximal_effort:
+    if effort_scale_bounds is not None:
+        scale_low, scale_high = effort_scale_bounds
+    elif is_maximal_effort:
         scale_low, scale_high = FAST_ANCHOR_TIME_SCALE_LOW, FAST_ANCHOR_TIME_SCALE_HIGH
     else:
         scale_low, scale_high = LONG_ANCHOR_EFFORT_SCALE_LOW, LONG_ANCHOR_EFFORT_SCALE_HIGH
