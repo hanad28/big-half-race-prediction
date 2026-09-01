@@ -14,10 +14,16 @@ from big_half.riegel import format_hms
 
 FIGURES_DIR = Path(__file__).resolve().parents[2] / "results" / "figures"
 
+BASELINE_COMPARISON_TITLE = (
+    "Baseline Big Half predictions: point estimates with Monte Carlo ranges\n"
+    "(5th-95th percentile under stated assumptions)"
+)
+
 
 def plot_prediction_comparison(
     ranges: list[PredictionRange],
     output_path: Path = FIGURES_DIR / "baseline_comparison.png",
+    title: str = BASELINE_COMPARISON_TITLE,
 ) -> Path:
     """Plot each anchor's point prediction with its Monte Carlo range."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -48,10 +54,7 @@ def plot_prediction_comparison(
     axis.set_yticklabels([prediction.anchor.label for prediction in ranges])
     axis.set_ylim(-0.5, len(ranges) - 0.5)
     axis.set_xlabel("Predicted half marathon time (minutes)")
-    axis.set_title(
-        "Baseline Big Half predictions: point estimates with Monte Carlo ranges\n"
-        "(5th-95th percentile under stated assumptions)"
-    )
+    axis.set_title(title)
     axis.grid(axis="x", alpha=0.3)
     figure.tight_layout()
     figure.savefig(output_path, dpi=150)

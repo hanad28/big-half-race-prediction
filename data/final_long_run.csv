@@ -1,0 +1,2 @@
+activity_id,date,name,distance_km,moving_time_s,moving_time_min,pace_min_per_km,avg_hr,notes
+19989829222,2026-08-30,Final pre-race run (progression),10.00,3354,55.90,5.59,~161,"Deliberate progression run: km1 warm-up (HR 139), km2-6 steady (HR ~156-158), km7-9 building hard (HR 167-177), km10 easing slightly (HR 161). Watch left running after finish: km11 and a 70.5m fragment are car travel (pace 3:42/km, cadence 62, avg power ~0W, max speed 38.5km/h) and have been excluded entirely from this file and from the analysis."
