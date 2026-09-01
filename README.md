@@ -70,7 +70,7 @@ pip install -e .
 python -m big_half.baseline
 ```
 
-## Calibration (generated 2026-09-01 13:09 UTC)
+## Calibration (generated 2026-09-01 13:31 UTC)
 
 The final pre-race training run arrived on 2026-08-30: a 10.00 km progression run in 55:54 ([`data/final_long_run.csv`](data/final_long_run.csv)). It is added here as a third Riegel anchor, in a separate artefact at [`results/calibration_prediction.md`](results/calibration_prediction.md). The baseline artefact is untouched, as promised in the Overview.
 

@@ -9,6 +9,7 @@ Run with: python -m big_half.calibration
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,6 +42,10 @@ CALIBRATION_CHART_TITLE = (
     "(5th-95th percentile under stated assumptions)"
 )
 
+# Markdown line prefix under which the chart's hash is recorded, so the
+# artefact pins the exact chart it was written alongside.
+CHART_HASH_PREFIX = "Chart SHA-256: "
+
 
 def build_calibration_predictions() -> list[PredictionRange]:
     """The two baseline anchors plus the final progression run anchor."""
@@ -62,7 +67,13 @@ def build_calibration_predictions() -> list[PredictionRange]:
     ]
 
 
-def render_artefact(ranges: list[PredictionRange], generated_at: str) -> str:
+def _sha256_of_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def render_artefact(
+    ranges: list[PredictionRange], generated_at: str, chart_hash: str
+) -> str:
     """Render the calibration artefact document as markdown text."""
     overall_low, overall_high = combined_range(ranges)
 
@@ -91,6 +102,8 @@ def render_artefact(ranges: list[PredictionRange], generated_at: str) -> str:
         f"Overall calibration range: **{format_hms(overall_low)} to "
         f"{format_hms(overall_high)}** (union of the three anchor intervals).",
         "",
+        f"{CHART_HASH_PREFIX}{chart_hash}",
+        "",
         "See the README Calibration section for how this compares with the "
         "baseline and why the progression anchor's effort-scale assumption "
         "differs from the 15 km anchor's.",
@@ -100,12 +113,15 @@ def render_artefact(ranges: list[PredictionRange], generated_at: str) -> str:
 
 def write_artefact(
     ranges: list[PredictionRange],
+    chart_hash: str,
     output_path: Path = CALIBRATION_ARTEFACT_PATH,
 ) -> Path:
     """Write the calibration prediction as a standalone timestamped document.
 
-    Like the baseline, this is a one-off pre-race record: it must only
-    ever be created once, so refuse to overwrite an existing file.
+    Records the hash of the already-written chart so the artefact pins
+    the exact chart it belongs with. Like the baseline, this is a
+    one-off pre-race record: it must only ever be created once, so
+    refuse to overwrite an existing file.
     """
     if output_path.exists():
         raise FileExistsError(
@@ -115,7 +131,7 @@ def write_artefact(
         )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    output_path.write_text(render_artefact(ranges, generated_at))
+    output_path.write_text(render_artefact(ranges, generated_at, chart_hash))
     logger.info("Wrote calibration artefact to %s", output_path)
     return output_path
 
@@ -126,18 +142,39 @@ def _without_timestamp_line(document: str) -> str:
     )
 
 
+def chart_hash_matches(
+    artefact_path: Path = CALIBRATION_ARTEFACT_PATH,
+    chart_path: Path = CALIBRATION_CHART_PATH,
+) -> bool:
+    """Whether the chart on disk hashes to the value recorded in the artefact."""
+    recorded = next(
+        (
+            line.removeprefix(CHART_HASH_PREFIX)
+            for line in artefact_path.read_text().splitlines()
+            if line.startswith(CHART_HASH_PREFIX)
+        ),
+        None,
+    )
+    return recorded is not None and recorded == _sha256_of_file(chart_path)
+
+
 def check_against_committed(
     ranges: list[PredictionRange],
     artefact_path: Path = CALIBRATION_ARTEFACT_PATH,
+    chart_path: Path = CALIBRATION_CHART_PATH,
 ) -> bool:
-    """Compare freshly recomputed values against the committed artefact.
+    """Compare freshly recomputed values against the committed artefact set.
 
-    Ignores the generation timestamp line; the Monte Carlo is seeded, so
-    recomputed values should match the committed ones exactly.
+    Verifies both parts of the set: the markdown values (ignoring the
+    generation timestamp line; the Monte Carlo is seeded, so recomputed
+    values should match exactly) and the chart, via the hash recorded
+    in the artefact at write time.
     """
     committed = _without_timestamp_line(artefact_path.read_text())
-    recomputed = _without_timestamp_line(render_artefact(ranges, generated_at=""))
-    return committed == recomputed
+    recomputed = _without_timestamp_line(
+        render_artefact(ranges, generated_at="", chart_hash=_sha256_of_file(chart_path))
+    )
+    return committed == recomputed and chart_hash_matches(artefact_path, chart_path)
 
 
 def main() -> None:
@@ -161,11 +198,17 @@ def main() -> None:
                 "artefact set is incomplete and nothing was written. "
                 "Restore the committed set from version control."
             )
+        elif not chart_hash_matches():
+            logger.warning(
+                "Calibration artefact set already exists; nothing written. "
+                "The chart on disk DOES NOT MATCH the hash recorded in the "
+                "artefact. Restore the committed chart from version control."
+            )
         elif check_against_committed(ranges):
             logger.info(
                 "Calibration artefact set already exists; nothing written. "
-                "Recomputed values MATCH the committed artefact (the chart "
-                "renders these same values)."
+                "Recomputed values MATCH the committed artefact and the "
+                "chart matches its recorded hash."
             )
         else:
             logger.warning(
@@ -173,13 +216,13 @@ def main() -> None:
                 "Recomputed values DO NOT MATCH the committed artefact."
             )
     else:
-        write_artefact(ranges)
         chart_path = plot_prediction_comparison(
             ranges,
             output_path=CALIBRATION_CHART_PATH,
             title=CALIBRATION_CHART_TITLE,
         )
         logger.info("Wrote chart to %s", chart_path)
+        write_artefact(ranges, chart_hash=_sha256_of_file(chart_path))
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
+import hashlib
 from pathlib import Path
 
 import pytest
 
 from big_half.calibration import (
     build_calibration_predictions,
+    chart_hash_matches,
     check_against_committed,
     write_artefact,
 )
@@ -62,18 +64,39 @@ def test_calibration_predictions_have_three_anchors() -> None:
     assert high == max(prediction.high_s for prediction in ranges)
 
 
+def _write_artefact_set(tmp_path: Path) -> tuple[Path, Path]:
+    ranges = build_calibration_predictions()
+    chart = tmp_path / "calibration_comparison.png"
+    chart.write_bytes(b"chart bytes")
+    artefact = tmp_path / "calibration_prediction.md"
+    write_artefact(ranges, chart_hash=_sha256(chart), output_path=artefact)
+    return artefact, chart
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def test_write_artefact_refuses_to_overwrite(tmp_path: Path) -> None:
     ranges = build_calibration_predictions()
-    target = tmp_path / "calibration_prediction.md"
-    write_artefact(ranges, output_path=target)
+    artefact, chart = _write_artefact_set(tmp_path)
     with pytest.raises(FileExistsError):
-        write_artefact(ranges, output_path=target)
+        write_artefact(ranges, chart_hash=_sha256(chart), output_path=artefact)
 
 
 def test_check_against_committed(tmp_path: Path) -> None:
     ranges = build_calibration_predictions()
-    target = tmp_path / "calibration_prediction.md"
-    write_artefact(ranges, output_path=target)
-    assert check_against_committed(ranges, artefact_path=target)
-    target.write_text(target.read_text().replace("2:0", "9:9"))
-    assert not check_against_committed(ranges, artefact_path=target)
+    artefact, chart = _write_artefact_set(tmp_path)
+    assert check_against_committed(ranges, artefact_path=artefact, chart_path=chart)
+    artefact.write_text(artefact.read_text().replace("2:0", "9:9"))
+    assert not check_against_committed(ranges, artefact_path=artefact, chart_path=chart)
+
+
+def test_chart_hash_mismatch_detected(tmp_path: Path) -> None:
+    ranges = build_calibration_predictions()
+    artefact, chart = _write_artefact_set(tmp_path)
+    assert chart_hash_matches(artefact_path=artefact, chart_path=chart)
+    chart.write_bytes(b"tampered chart bytes")
+    assert not chart_hash_matches(artefact_path=artefact, chart_path=chart)
+    # Values are unchanged, so the failure comes from the chart hash alone
+    assert not check_against_committed(ranges, artefact_path=artefact, chart_path=chart)
