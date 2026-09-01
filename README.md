@@ -70,6 +70,30 @@ pip install -e .
 python -m big_half.baseline
 ```
 
+## Calibration (generated 2026-09-01 13:09 UTC)
+
+The final pre-race training run arrived on 2026-08-30: a 10.00 km progression run in 55:54 ([`data/final_long_run.csv`](data/final_long_run.csv)). It is added here as a third Riegel anchor, in a separate artefact at [`results/calibration_prediction.md`](results/calibration_prediction.md). The baseline artefact is untouched, as promised in the Overview.
+
+### Three anchors side by side
+
+| Anchor | Effort type | Point (b = 1.06) | Monte Carlo range |
+|---|---|---|---|
+| Fastest 5k effort (23:35) | Near-maximal | 1:48:29 | 1:47:00 to 1:57:04 |
+| Final progression run (10.00 km, 55:54) | Mixed, partly race effort | 2:03:20 | 1:57:55 to 2:05:20 |
+| Longest training run (15.04 km, 88:58) | Steady, sub-maximal | 2:07:22 | 1:55:48 to 2:07:26 |
+
+![Calibration prediction comparison](results/figures/calibration_comparison.png)
+
+### What changed, and what did not
+
+The overall range is unchanged: **1:47:00 to 2:07:26**, still the union of the anchor intervals, because the new anchor's interval sits entirely inside the baseline's overall range. What the third anchor adds is agreement in the middle. Its range (1:57:55 to 2:05:20) sits entirely within the long-run anchor's and starts just above where the 5k anchor's ends, so the two anchors closest to race distance now agree on roughly 1:58 to 2:05. The baseline's central expectation of "roughly 1:56 to 1:57" was set by where its only two anchors overlapped; the new anchor, closer to race distance than the 5k and harder-run than the 15 km, pulls that central expectation towards the low 2:00s.
+
+### Why this anchor's effort assumption differs
+
+The 15 km long run was a steady solo effort throughout, so the baseline assumed a race over that distance could be up to 10% faster (effort scale 0.90 to 1.00). The progression run was not steady: it was comfortable through km 1 to 6, built deliberately hard through km 7 to 9 (HR climbing from 167 to 177), and eased slightly in km 10. Since part of the run was already at or near race effort, assuming a further 10% improvement would double-count effort the athlete has already spent. This anchor instead assumes a race could be up to 5% faster (effort scale 0.95 to 1.00). The 5% figure is a judgement call, not a measured quantity: it says the plausible race-versus-logged gap is about half the steady-run gap, because roughly the later half of the run was already run hard. Reasonable alternatives (say 0.93 or 0.97 at the low end) would shift this anchor's lower bound by a couple of minutes without changing the overall range.
+
+One data-cleaning note for provenance: the raw watch recording continued after the run finished, capturing car travel (pace 3:42/km, cadence 62 against about 77 for every genuine running lap, near-zero power, max speed 38.5 km/h). That segment was removed at source before the data entered this repo, so the 10.00 km / 55:54 figures are the complete, correct run.
+
 ## Limitations
 
 - **This prediction is a solo-training baseline.** Every run in the dataset was solo. Race day involves crowds, other runners and pacing off strangers, none of which solo training data can capture. The sports-science literature calls the performance effect of the presence of others social facilitation (Triplett, 1898; Zajonc, 1965). If the actual result comes in faster than predicted, that is consistent with this effect, not proof of it, since a single race is a single data point.
