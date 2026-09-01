@@ -2,6 +2,18 @@
 
 Predicting my Big Half finish time from a small, honestly-reported training dataset.
 
+## Predicted finish time
+
+**1:58 to 2:05**, from the two training anchors closest to race distance (see Calibration below). The full baseline range across all three anchors, a more conservative but less informative figure, is 1:47:00 to 2:07:26.
+
+| Stage | Range | Date |
+|---|---|---|
+| Baseline (2 anchors) | 1:47:00 to 2:07:26 | 2026-08-30 |
+| Calibrated (3 anchors, tightened) | 1:58 to 2:05 | 2026-09-01 |
+| Actual result | pending | race day |
+
+Full derivation and the reasoning behind each figure is in Method and Calibration below.
+
 ## Overview
 
 This project predicts my finish time for the Big Half (21.0975 km) from 11 logged training runs. The dataset is genuinely small, so it deliberately avoids fitting a supervised machine learning model, which would be statistically indefensible at n = 11. Instead it applies an established sports-science extrapolation method (Riegel's formula) from two different anchor efforts, reconciles the two answers, and reports an honest uncertainty range rather than a single number.
