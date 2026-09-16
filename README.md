@@ -68,7 +68,7 @@ The reported range for each anchor is the 5th to 95th percentile of the simulate
 
 ## Baseline results (generated 2026-08-30 15:32 UTC)
 
-Full artefact: [`results/baseline_prediction.md`](results/baseline_prediction.md). The artefact was regenerated once at 16:42 UTC the same day, pre-race, to correct the interval labelling; the values are unchanged and no further regeneration will happen before the calibration step.
+Full artefact: [`results/baseline_prediction.md`](results/baseline_prediction.md). The artefact was regenerated once at 16:42 UTC the same day, pre-race, to correct the interval labelling; the values are unchanged. It has not been regenerated since, and the two later stages wrote their own artefacts rather than touching this one.
 
 | Anchor | Point (Riegel, b = 1.06) | Monte Carlo range |
 |---|---|---|
@@ -127,7 +127,9 @@ The result landed inside the range built from the 5k anchor and outside the tigh
 
 ![Race result against the published ranges](results/figures/race_result_comparison.png)
 
-Calibration left the overall range alone and tightened the headline prediction to 1:58 to 2:05, moving it away from the answer in the process. The wider baseline union, described above as more conservative but less informative, contained the result. The tightened figure missed it by 5:06. Narrowing a range only helps if the extra confidence is earned, and here it was not.
+One definition decides that first row. The calibrated range is read here as the intersection of the two anchors closest to race distance, 1:57:55 to 2:05:20, which is the window that produced the published 1:58 to 2:05 headline. Read instead as the union of those same two anchors, 1:55:48 to 2:07:26, the result is still outside, faster than the fast end by 179.5 s (2:59) rather than 306.2 s (5:06). Neither reading contains it, so which one was meant changes the size of the miss but not the conclusion.
+
+Calibration left the overall range alone and tightened the headline prediction to 1:58 to 2:05, moving it away from the answer in the process. The wider baseline union, described above as more conservative but less informative, contained the result. The tightened figure missed it by 5:06. The tightening rested on the two nearest anchors agreeing with each other, but they agreed because they shared a flaw: both were sub-maximal efforts, so both were slow in the same direction and for the same reason. Their agreement measured that shared property rather than anything about the race.
 
 ### What each anchor implied after the fact
 
@@ -143,13 +145,9 @@ The implied exponent is the value of `b` that maps each anchor exactly onto 1:52
 
 The Limitations section below was written before the race and says every run in the dataset was solo, that race day brings crowds and pacing off strangers, and that a faster-than-predicted result would be consistent with social facilitation (Triplett, 1898; Zajonc, 1965) rather than proof of it. The result did come in faster than the calibrated prediction, and the anchors that missed are the two sub-maximal solo runs.
 
-The claim stays at consistent with, for three reasons.
+The claim stays at consistent with. Riegel's formula assumes a maximal effort at both ends, and that assumption sorts the anchors the same way the result did: the race was a maximal effort and the 5k was close to one, while the long run and the progression run were not, and those two are the ones that missed. Other runners are one thing that separates a race from a training run, but so are the taper, the fuelling, the pacing discipline and the willingness to hurt, and none of those needs a crowd to happen.
 
-- This is one race. A single data point cannot separate competing explanations, however neatly it lines up with one of them.
-- A simpler explanation fits the same facts. Riegel's formula assumes a maximal effort at both ends. The race was one and the 5k anchor was close to one; the long run and the progression run were not. The anchor that matched the race in effort type is the anchor that predicted it. Other runners are one thing that separates a race from a training run, but so are the taper, the fuelling, the pacing discipline and the willingness to hurt.
-- The anchor that held is the least verified input in the project. Strava's 23:35 is a best-effort extraction from within a training run, not a time trial, and it happened to be right once.
-
-The second point deserves one more turn. The 5k anchor was itself a solo effort, so the line between the anchors that worked and the anchors that did not runs along effort type, not along whether anyone else was there. That does not rule out a social-facilitation contribution on top: the race could have been slower run alone and still landed inside the 5k anchor's range. It does mean this result is not evidence for one. Future Work says what would be.
+The 5k anchor was also run alone, which matters more than it first appears. The line between the anchors that worked and the anchors that did not follows effort type, not whether anyone else was on the road. That does not rule out a social-facilitation contribution on top, since the race could have been slower run solo and still landed inside the 5k anchor's range, but nothing here counts as evidence for one. Nor does it help that the anchor which held is the least verified input in the project, Strava's 23:35 estimate rather than a measured time trial. One race cannot pull apart explanations that all fit it, and Future Work says what would.
 
 To regenerate:
 
@@ -168,11 +166,13 @@ Written before the race and left as written. The Race Day Result section above s
 
 ## Future Work
 
-The result changes which of these matters most, so the order has changed.
+The result reorders what was already here.
 
-- **Run a solo time trial at race effort, over 10 km or so.** This is now the first thing to do. The one near-maximal anchor in the dataset predicted the race and the sub-maximal ones did not, which points at effort type rather than at the crowd. But that anchor is Strava's estimate rather than a measured effort, and it covers a quarter of the race distance. A verified solo maximal effort at 10 km tests the same idea over a distance close enough for Riegel to be reliable. If it extrapolates as well as the 5k anchor did, effort type accounts for the gap on its own and social facilitation is not needed to explain it.
-- **Fit a personal Riegel exponent once more than one race exists.** This race implies 1.0872 from the 5k anchor, against the population value of 1.06. One race, resting on an estimated anchor, is not enough to fit anything. A second race at a different distance would make it worth doing.
-- **Compare solo training paces against group and event paces across several races.** Unchanged by the result, and still the only way to turn the social-facilitation point into something testable rather than something consistent with the evidence.
+A solo time trial at race effort, over 10 km or so, is now the first thing to do. The one near-maximal anchor in the dataset predicted the race and the sub-maximal ones did not, which points at effort type rather than at the crowd, but that anchor is Strava's estimate rather than a measured effort and it covers a quarter of the race distance. A verified solo maximal effort at 10 km would test the same idea over a distance close enough for Riegel to be reliable. If it extrapolates as well as the 5k anchor did, effort type accounts for the gap on its own.
+
+A personal Riegel exponent has to wait for a second race. This one implies 1.0872 from the 5k anchor, against the population value of 1.06, but a single race resting on an estimated anchor is not enough to fit anything. A second race at a different distance would change that.
+
+Comparing solo training paces against group and event paces across several races was here before race day and is unchanged by it. It is still the only route from a caveat the evidence happens to be consistent with to something that can actually be tested.
 
 ## References
 
