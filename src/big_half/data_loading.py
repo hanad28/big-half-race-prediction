@@ -35,7 +35,8 @@ class RaceResult:
     GPS distance is retained only to document the discrepancy between them.
     """
 
-    label: str
+    name: str
+    date: str
     official_distance_km: float
     gps_distance_km: float
     moving_time_s: float
@@ -99,7 +100,8 @@ def load_race_result(csv_path: Path = RACE_RESULT_CSV_PATH) -> RaceResult:
         )
     race = results.iloc[0]
     return RaceResult(
-        label=f"{race['name']} ({race['date'].date()})",
+        name=str(race["name"]),
+        date=str(race["date"].date()),
         official_distance_km=float(race["official_distance_km"]),
         gps_distance_km=float(race["gps_distance_km"]),
         moving_time_s=float(race["moving_time_s"]),

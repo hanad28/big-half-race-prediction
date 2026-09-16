@@ -49,12 +49,18 @@ MONTE_CARLO_RANGE_QUANTILES: tuple[float, float] = (0.05, 0.95)
 @dataclass(frozen=True)
 class PredictionRange:
     """A point prediction with a Monte Carlo range (5th-95th percentile
-    under stated assumptions), in seconds."""
+    under stated assumptions), in seconds.
+
+    The range carries the effort-scale bounds it was drawn under, so a
+    later stage can compare what was assumed against what happened
+    without having to restate the assumption by hand.
+    """
 
     anchor: Effort
     point_s: float
     low_s: float
     high_s: float
+    effort_scale_bounds: tuple[float, float]
 
 
 def point_prediction(anchor: Effort, target_km: float = HALF_MARATHON_KM) -> float:
@@ -106,6 +112,7 @@ def predict_with_uncertainty(
         point_s=point_prediction(anchor, target_km),
         low_s=float(np.quantile(samples, low_q)),
         high_s=float(np.quantile(samples, high_q)),
+        effort_scale_bounds=(scale_low, scale_high),
     )
 
 

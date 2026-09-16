@@ -31,7 +31,8 @@ def test_load_race_result_reads_the_single_race() -> None:
     assert race.gps_distance_km == 21.3565
     assert race.moving_time_s == 6769.0
     assert race.elapsed_time_s == 6778.0
-    assert "BIG HALF" in race.label
+    assert race.name == "BIG HALF"
+    assert race.date == "2026-09-06"
 
 
 def test_race_result_derived_figures() -> None:
@@ -56,7 +57,11 @@ def _range(
         label=f"{distance_km} km", distance_km=distance_km, time_s=3000.0
     )
     return PredictionRange(
-        anchor=anchor, point_s=(low_s + high_s) / 2, low_s=low_s, high_s=high_s
+        anchor=anchor,
+        point_s=(low_s + high_s) / 2,
+        low_s=low_s,
+        high_s=high_s,
+        effort_scale_bounds=(1.0, 1.0),
     )
 
 
