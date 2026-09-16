@@ -78,6 +78,7 @@ RANGE_HIT_COLOUR = "#4c72b0"
 RANGE_MISS_COLOUR = "#b0aba4"
 ACTUAL_RESULT_COLOUR = "#c44e52"
 
+# Bars sit well under a y-tick spacing of 1 without touching each other.
 RANGE_BAR_HEIGHT = 0.4
 # Long window names need wrapping to stay readable as y-axis labels.
 RANGE_LABEL_WRAP_CHARS = 30
@@ -87,7 +88,7 @@ def _range_bar_colour(comparison: RangeComparison) -> str:
     return RANGE_HIT_COLOUR if comparison.contains_actual else RANGE_MISS_COLOUR
 
 
-def _range_legend_handles() -> list[Patch]:
+def _range_legend_handles() -> list[Patch | Line2D]:
     return [
         Patch(color=RANGE_HIT_COLOUR, label="Range contained the result"),
         Patch(color=RANGE_MISS_COLOUR, label="Range missed the result"),
