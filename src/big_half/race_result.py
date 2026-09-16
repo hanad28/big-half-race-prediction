@@ -163,8 +163,9 @@ def render_artefact(
         "",
         "Moving time is the figure comparable with the published "
         "predictions, which predicted a time for the official distance. "
-        "The race had no meaningful stops, so elapsed time is 9 s longer "
-        "and the comparisons below hold for either figure. The GPS "
+        "The race had no meaningful stops, so elapsed time is "
+        f"{race.elapsed_time_s - race.moving_time_s:.0f} s longer and the "
+        "comparisons below hold for either figure. The GPS "
         "distance overshoot is ordinary tangent-cutting error on a course "
         "with turns, and the official distance is the one used throughout.",
         "",
@@ -180,8 +181,8 @@ def render_artefact(
         *_anchor_implication_rows(analysis.calibration_ranges, race.moving_time_s),
         "",
         "The implied exponent is the Riegel exponent that maps each anchor "
-        f"exactly onto the actual time. The time multiplier is what the "
-        f"anchor's logged time would have to be scaled by, at the standard "
+        "exactly onto the actual time. The time multiplier is what the "
+        "anchor's logged time would have to be scaled by, at the standard "
         f"b = {RIEGEL_DEFAULT_EXPONENT} exponent, to land on the actual "
         f"time over {HALF_MARATHON_KM} km. It is directly comparable with "
         "the multiplier assumed before the race, in the last column.",
