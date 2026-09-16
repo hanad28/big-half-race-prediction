@@ -112,3 +112,39 @@ def predict_with_uncertainty(
 def combined_range(ranges: list[PredictionRange]) -> tuple[float, float]:
     """A single honest overall range: the union of the anchor intervals."""
     return min(r.low_s for r in ranges), max(r.high_s for r in ranges)
+
+
+def intersection_range(ranges: list[PredictionRange]) -> tuple[float, float]:
+    """The window where every supplied anchor interval agrees.
+
+    Raises ValueError if the intervals do not all overlap, since an empty
+    intersection has no honest reading as a prediction range.
+    """
+    low = max(r.low_s for r in ranges)
+    high = min(r.high_s for r in ranges)
+    if low > high:
+        raise ValueError("Anchor intervals do not overlap, so there is no intersection")
+    return low, high
+
+
+def ranges_closest_to_target(
+    ranges: list[PredictionRange],
+    count: int,
+    target_km: float = HALF_MARATHON_KM,
+) -> list[PredictionRange]:
+    """The `count` anchors whose own distance sits nearest the target distance.
+
+    Riegel extrapolation is most reliable over short distance ratios, so
+    proximity to the target is the criterion for which anchors to trust.
+    """
+    if count > len(ranges):
+        raise ValueError(f"Asked for {count} anchors but only {len(ranges)} supplied")
+    by_proximity = sorted(
+        ranges, key=lambda r: abs(r.anchor.distance_km - target_km)
+    )
+    return by_proximity[:count]
+
+
+def shortest_anchor_range(ranges: list[PredictionRange]) -> PredictionRange:
+    """The anchor over the shortest distance, which is the near-maximal effort."""
+    return min(ranges, key=lambda r: r.anchor.distance_km)
