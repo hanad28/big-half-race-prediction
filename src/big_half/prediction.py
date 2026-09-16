@@ -127,8 +127,8 @@ def intersection_range(ranges: list[PredictionRange]) -> tuple[float, float]:
     Raises ValueError if the intervals do not all overlap, since an empty
     intersection has no honest reading as a prediction range.
     """
-    low = max(r.low_s for r in ranges)
-    high = min(r.high_s for r in ranges)
+    low = max(prediction.low_s for prediction in ranges)
+    high = min(prediction.high_s for prediction in ranges)
     if low > high:
         raise ValueError("Anchor intervals do not overlap, so there is no intersection")
     return low, high
@@ -147,11 +147,11 @@ def ranges_closest_to_target(
     if count > len(ranges):
         raise ValueError(f"Asked for {count} anchors but only {len(ranges)} supplied")
     by_proximity = sorted(
-        ranges, key=lambda r: abs(r.anchor.distance_km - target_km)
+        ranges, key=lambda prediction: abs(prediction.anchor.distance_km - target_km)
     )
     return by_proximity[:count]
 
 
 def shortest_anchor_range(ranges: list[PredictionRange]) -> PredictionRange:
     """The anchor over the shortest distance, which is the near-maximal effort."""
-    return min(ranges, key=lambda r: r.anchor.distance_km)
+    return min(ranges, key=lambda prediction: prediction.anchor.distance_km)
