@@ -132,11 +132,14 @@ def plot_result_against_ranges(
 
     actual_min = actual_s / 60
     axis.axvline(actual_min, color=ACTUAL_RESULT_COLOUR, linestyle="--", linewidth=2)
+    # Pinned to the top of the axes rather than to a bar, so the label
+    # stays put whichever range the result happens to fall in.
     axis.annotate(
         f"Actual {format_hms(actual_s)}",
-        (actual_min, len(comparisons) - 0.5),
+        (actual_min, 1.0),
+        xycoords=("data", "axes fraction"),
         textcoords="offset points",
-        xytext=(6, -12),
+        xytext=(6, -14),
         ha="left",
         color=ACTUAL_RESULT_COLOUR,
         fontweight="bold",

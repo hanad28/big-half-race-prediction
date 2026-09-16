@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from big_half import baseline, calibration, race_result
 from big_half.artefact_guard import (
     CHART_HASH_PREFIX,
     TIMESTAMP_LINE_PREFIX,
@@ -13,6 +14,20 @@ from big_half.artefact_guard import (
     without_timestamp_line,
     write_once,
 )
+
+# Every artefact set the repository has committed. None of them may ever
+# change as a side effect of running a stage again.
+COMMITTED_ARTEFACT_PATHS = [
+    baseline.BASELINE_ARTEFACT_PATH,
+    baseline.BASELINE_CHART_PATH,
+    calibration.CALIBRATION_ARTEFACT_PATH,
+    calibration.CALIBRATION_CHART_PATH,
+    race_result.RACE_RESULT_ARTEFACT_PATH,
+    race_result.RACE_RESULT_CHART_PATH,
+]
+
+STAGE_GENERATORS = [baseline.main, calibration.main, race_result.main]
+
 
 
 def _render(chart_hash: str, values: str = "point 1:52:49") -> str:
@@ -111,3 +126,25 @@ def test_inspect_detects_half_a_set(artefact_set: tuple[Path, Path]) -> None:
     chart.unlink()
     state = inspect_artefact_set(artefact, chart, _render)
     assert state is ArtefactSetState.CHART_MISSING
+
+
+def test_committed_artefacts_still_pin_their_own_charts() -> None:
+    """Each committed artefact must still pin the chart it was written with."""
+    assert chart_hash_matches(
+        calibration.CALIBRATION_ARTEFACT_PATH, calibration.CALIBRATION_CHART_PATH
+    )
+    assert chart_hash_matches(
+        race_result.RACE_RESULT_ARTEFACT_PATH, race_result.RACE_RESULT_CHART_PATH
+    )
+
+
+def test_rerunning_every_stage_leaves_committed_artefacts_byte_identical() -> None:
+    """The end-to-end guard check: no stage may rewrite what is committed."""
+    missing = [path for path in COMMITTED_ARTEFACT_PATHS if not path.exists()]
+    assert not missing, f"committed artefacts missing from the working tree: {missing}"
+
+    before = {path: sha256_of_file(path) for path in COMMITTED_ARTEFACT_PATHS}
+    for generate_stage in STAGE_GENERATORS:
+        generate_stage()
+    after = {path: sha256_of_file(path) for path in COMMITTED_ARTEFACT_PATHS}
+    assert after == before
