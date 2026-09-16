@@ -4,24 +4,29 @@ Predicting my Big Half finish time from a small, honestly-reported training data
 
 ## Predicted finish time
 
-**1:58 to 2:05**, from the two training anchors closest to race distance (see Calibration below). The full baseline range across all three anchors, a more conservative but less informative figure, is 1:47:00 to 2:07:26.
+Predicted **1:58 to 2:05**, from the two training anchors closest to race distance (see Calibration below). The wider range spanned by all three anchors, more conservative but less informative, is 1:47:00 to 2:07:26.
 
-| Stage | Range | Date |
+Actual result: **1:52:49**. That is faster than the predicted range and inside the wider one.
+
+| Stage | Figure | Date |
 |---|---|---|
 | Baseline (2 anchors) | 1:47:00 to 2:07:26 | 2026-08-30 |
 | Calibrated (3 anchors, tightened) | 1:58 to 2:05 | 2026-09-01 |
-| Actual result | pending | race day |
+| Actual result | 1:52:49 | 2026-09-06 |
 
-Full derivation and the reasoning behind each figure is in Method and Calibration below.
+Full derivation and the reasoning behind each figure is in Method, Calibration and Race Day Result below.
 
 ## Overview
 
-This project predicts my finish time for the Big Half (21.0975 km) from 11 logged training runs. The dataset is genuinely small, so it deliberately avoids fitting a supervised machine learning model, which would be statistically indefensible at n = 11. Instead it applies an established sports-science extrapolation method (Riegel's formula) from two different anchor efforts, reconciles the two answers, and reports an honest uncertainty range rather than a single number.
+This project predicts my finish time for the Big Half (21.0975 km) from 11 logged training runs, then checks that prediction against what actually happened. The dataset is genuinely small, so it deliberately avoids fitting a supervised machine learning model, which would be statistically indefensible at n = 11. Instead it applies an established sports-science extrapolation method (Riegel's formula) from several anchor efforts, reconciles the answers they give, and reports an honest uncertainty range rather than a single number.
 
 The project is staged on purpose:
 
-1. **Baseline (this stage).** A prediction from the 11-run dataset, generated, timestamped and committed before my final long training run and before race day. The artefact lives at [`results/baseline_prediction.md`](results/baseline_prediction.md).
-2. **Calibration (later, separate step).** When the final long run's data arrives, it will be added as a clearly separate calibration step. The baseline artefact will not be edited or overwritten, so the repo history shows what was predicted, and when, before each new piece of evidence arrived.
+1. **Baseline.** A prediction from the 11-run dataset, generated, timestamped and committed before my final long training run and before race day: [`results/baseline_prediction.md`](results/baseline_prediction.md).
+2. **Calibration.** The final long run added as a third anchor, after the baseline was frozen: [`results/calibration_prediction.md`](results/calibration_prediction.md).
+3. **Race result.** The actual finish time measured against both published predictions: [`results/race_result.md`](results/race_result.md).
+
+No artefact is edited once written. Each stage adds a new timestamped file and its own chart, so the history shows what was predicted, and when, before each new piece of evidence arrived. Rerunning a stage recomputes the values and reports whether they still match, but will not overwrite what is committed.
 
 ## Method
 
@@ -49,7 +54,7 @@ That is a 19-minute gap, and it is not a bug. It comes from what each anchor act
 - The **5k anchor** is close to a maximal effort, which is what Riegel's model assumes. Extrapolating a short maximal effort out to 21.1 km asks the formula to stretch over a 4x distance ratio, and it implicitly assumes the endurance base to hold that extrapolated pace. Vickers and Vertosick (2016), in a study of 2,303 recreational runners, found the standard 1.06 exponent well calibrated up to the half marathon on average, but optimistic for runners with lower training volume, who are better described by larger exponents. With a short training history like mine, the 5k-based figure is best read as the fast end of the plausible range.
 - The **long-run anchor** is much closer to race distance (only a 1.4x extrapolation), which makes the formula more reliable. But it was a steady solo training run, not a race effort, and Riegel's formula assumes maximal efforts at both ends. Feeding it a sub-maximal time inflates the prediction, so the 2:07 figure is best read as the slow end.
 
-The truth plausibly sits between the two, and the honest output is a range, not a midpoint.
+The truth plausibly sits between the two, and the honest output is a range, not a midpoint. A third anchor, the final progression run, is added in Calibration below, after this baseline was frozen.
 
 ### Uncertainty quantification
 
@@ -106,7 +111,57 @@ The 15 km long run was a steady solo effort throughout, so the baseline assumed 
 
 One data-cleaning note for provenance: the raw watch recording continued after the run finished, capturing car travel (pace 3:42/km, cadence 62 against about 77 for every genuine running lap, near-zero power, max speed 38.5 km/h). That segment was removed at source before the data entered this repo, so the 10.00 km / 55:54 figures are the complete, correct run.
 
+## Race Day Result (generated 2026-09-16 15:04 UTC)
+
+**Finish time 1:52:49** over the official 21.0975 km, a pace of 5:21 per km ([`data/race_result.csv`](data/race_result.csv)). Full artefact: [`results/race_result.md`](results/race_result.md).
+
+The result landed inside the range built from the 5k anchor and outside the tighter calibrated range built from the two solo training runs. The anchor taken from a near-maximal short effort is the one that held. The two anchors taken from solo training both undersold the result, and they are the two the calibration step chose to trust. The Limitations section flagged before the race that a faster-than-predicted result was possible for close to this reason. The rest of this section is about how far that can honestly be pushed.
+
+### Gap against each published range
+
+| Published range | Window | Where the result landed | Exact gap |
+|---|---|---|---|
+| Calibrated range (two anchors closest to race distance) | 1:57:55 to 2:05:20 | Outside, faster | 5:06 faster than the fast end (306.2 s) |
+| Baseline range (union of the two baseline anchors) | 1:47:00 to 2:07:26 | Inside | 5:49 clear of the fast end (349.4 s), 14:37 clear of the slow end (876.9 s) |
+| 5k anchor range (near-maximal effort) | 1:47:00 to 1:57:04 | Inside | 5:49 clear of the fast end (349.4 s), 4:15 clear of the slow end (255.5 s) |
+
+![Race result against the published ranges](results/figures/race_result_comparison.png)
+
+Calibration tightened the headline prediction from 1:47:00 to 2:07:26 down to 1:58 to 2:05, and moved it away from the answer in the process. The wider baseline union, described above as more conservative but less informative, contained the result. The tightened figure missed it by 5:06. Narrowing a range only helps if the extra confidence is earned, and here it was not.
+
+### What each anchor implied, after the fact
+
+| Anchor | Implied Riegel exponent | Time multiplier needed | Multiplier assumed before the race |
+|---|---|---|---|
+| Fastest 5k effort (23:35) | 1.0872 | 1.0399 | 0.98 to 1.04 |
+| Longest training run (15.04 km) | 0.7016 | 0.8858 | 0.90 to 1.00 |
+| Final progression run (10.00 km) | 0.9406 | 0.9147 | 0.95 to 1.00 |
+
+The implied exponent is the value of `b` that maps each anchor exactly onto 1:52:49. For the 5k anchor it is 1.0872, inside the 1.05 to 1.10 band the Monte Carlo drew from, so that anchor reached the actual result without any special pleading. For the two solo runs it is below 1, which Riegel's formula cannot produce from a maximal effort: an exponent under 1 says the longer distance was covered at a faster pace than the anchor itself. Both runs were known to be sub-maximal and were labelled as such, but the pre-race assumptions understated how far off maximal they were. The 15.04 km run was assumed to be worth up to 10% on race day and would have needed 11.4%; the progression run was assumed to be worth up to 5% and would have needed 8.5%.
+
+### Solo training and social facilitation
+
+The Limitations section below was written before the race and says every run in the dataset was solo, that race day brings crowds and pacing off strangers, and that a faster-than-predicted result would be consistent with social facilitation (Triplett, 1898; Zajonc, 1965) rather than proof of it. The result did come in faster than the calibrated prediction, and the anchors that missed are the solo training ones.
+
+The claim stays at consistent with, for three reasons.
+
+- This is one race. A single data point cannot separate competing explanations, however neatly it lines up with one of them.
+- A simpler explanation fits the same facts. Riegel's formula assumes a maximal effort at both ends. The race was one and the 5k anchor was close to one; the long run and the progression run were not. The anchor that matched the race in effort type is the anchor that predicted it. Other runners are one thing that separates a race from a training run, but so are the taper, the fuelling, the pacing discipline and the willingness to hurt.
+- The anchor that held is the least verified input in the project. Strava's 23:35 is a best-effort extraction from within a training run, not a time trial, and it happened to be right once.
+
+The second point deserves one more turn. The 5k anchor was itself a solo effort, so the line between the anchors that worked and the anchors that did not runs along effort type, not along whether anyone else was there. That does not rule out a social-facilitation contribution on top: the race could have been slower run alone and still landed inside the 5k anchor's range. It does mean this result is not evidence for one. Future Work says what would be.
+
+To regenerate:
+
+```bash
+python -m big_half.race_result
+```
+
+Rerunning after the fact recomputes the comparison and reports whether it still matches the committed artefact. It will not rewrite it, and it will not touch the baseline or calibration artefacts.
+
 ## Limitations
+
+Written before the race and left as written. The Race Day Result section above says which of these the outcome touched.
 
 - **This prediction is a solo-training baseline.** Every run in the dataset was solo. Race day involves crowds, other runners and pacing off strangers, none of which solo training data can capture. The sports-science literature calls the performance effect of the presence of others social facilitation (Triplett, 1898; Zajonc, 1965). If the actual result comes in faster than predicted, that is consistent with this effect, not proof of it, since a single race is a single data point.
 - **The 5k anchor is an estimate, not a race.** Strava's 23:35 is extracted from within training runs. It anchors the fast end of the range but should not be treated as a verified standalone time trial.
@@ -115,8 +170,11 @@ One data-cleaning note for provenance: the raw watch recording continued after t
 
 ## Future Work
 
-- After the race, compare solo training paces against group and event paces over multiple future races. That would turn the social-facilitation point above from a stated limitation into a testable hypothesis with more than one data point.
-- Once two or three race results exist at different distances, fit a personal Riegel exponent instead of borrowing the population value.
+The result changes which of these matters most, so the order has changed.
+
+- **Run a solo time trial at race effort, over 10 km or so.** This is now the first thing to do. The one near-maximal anchor in the dataset predicted the race and the sub-maximal ones did not, which points at effort type rather than at the crowd. But that anchor is Strava's estimate rather than a measured effort, and it sits four times shorter than the race. A verified solo maximal effort at 10 km tests the same idea over a distance close enough for Riegel to be reliable. If it extrapolates as well as the 5k anchor did, effort type accounts for the gap on its own and social facilitation is not needed to explain it.
+- **Fit a personal Riegel exponent once more than one race exists.** This race implies 1.0872 from the 5k anchor, against the population value of 1.06. One race, resting on an estimated anchor, is not enough to fit anything. A second race at a different distance would make it worth doing.
+- **Compare solo training paces against group and event paces across several races.** Unchanged by the result, and still the only way to turn the social-facilitation point into something testable rather than something consistent with the evidence.
 
 ## References
 
