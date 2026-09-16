@@ -1,12 +1,12 @@
 # Big Half race result
 
-Generated: 2026-09-16 15:04 UTC
+Generated: 2026-09-16 15:14 UTC
 
 The Big Half was run on 2026-09-06 in 1:52:49, over the official distance of 21.0975 km. This artefact measures that result against the three windows published before the race. The frozen artefacts at results/baseline_prediction.md and results/calibration_prediction.md are unchanged; this is a separate, later record.
 
 ## Headline
 
-The result falls inside the range belonging to the 5k anchor alone (1:47:00 to 1:57:04), the anchor built from a near-maximal short effort. Against the tighter calibrated range, built from the two steady solo training efforts, the result is 5:06 faster than the range.
+The result falls inside the range belonging to the 5k anchor alone (1:47:00 to 1:57:04), the anchor built from a near-maximal short effort. Against the tighter calibrated range, built from the two anchors closest to race distance and neither of them a maximal effort, the result is 5:06 faster than the range.
 
 ## The race as run
 

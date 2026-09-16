@@ -111,7 +111,7 @@ The 15 km long run was a steady solo effort throughout, so the baseline assumed 
 
 One data-cleaning note for provenance: the raw watch recording continued after the run finished, capturing car travel (pace 3:42/km, cadence 62 against about 77 for every genuine running lap, near-zero power, max speed 38.5 km/h). That segment was removed at source before the data entered this repo, so the 10.00 km / 55:54 figures are the complete, correct run.
 
-## Race Day Result (generated 2026-09-16 15:04 UTC)
+## Race Day Result (generated 2026-09-16 15:14 UTC)
 
 **Finish time 1:52:49** over the official 21.0975 km, a pace of 5:21 per km ([`data/race_result.csv`](data/race_result.csv)). Full artefact: [`results/race_result.md`](results/race_result.md).
 

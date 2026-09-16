@@ -80,8 +80,9 @@ def _headline(comparisons: list[RangeComparison]) -> str:
         f"The result falls {side} the range belonging to the 5k anchor alone "
         f"({format_hms(fast_anchor.low_s)} to {format_hms(fast_anchor.high_s)}), "
         "the anchor built from a near-maximal short effort. Against the "
-        "tighter calibrated range, built from the two steady solo training "
-        f"efforts, the result is {describe_gap(calibrated)}."
+        "tighter calibrated range, built from the two anchors closest to "
+        "race distance and neither of them a maximal effort, the result is "
+        f"{describe_gap(calibrated)}."
     )
 
 
