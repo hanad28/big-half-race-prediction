@@ -1,0 +1,2 @@
+activity_id,date,name,gps_distance_km,official_distance_km,moving_time_s,elapsed_time_s,achievement_count,pr_count,notes
+20067074905,2026-09-06,BIG HALF,21.3565,21.0975,6769,6778,19,18,"GPS distance exceeds official race distance by ~0.26km, typical GPS tangent-cutting error on a race with turns. Moving time is the figure comparable to the published time predictions, not pace, since predictions were time-based for the official distance. Elapsed time nearly identical to moving time (9s gap), no meaningful stops during the race."

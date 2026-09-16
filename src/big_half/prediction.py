@@ -49,12 +49,18 @@ MONTE_CARLO_RANGE_QUANTILES: tuple[float, float] = (0.05, 0.95)
 @dataclass(frozen=True)
 class PredictionRange:
     """A point prediction with a Monte Carlo range (5th-95th percentile
-    under stated assumptions), in seconds."""
+    under stated assumptions), in seconds.
+
+    The range carries the effort-scale bounds it was drawn under, so a
+    later stage can compare what was assumed against what happened
+    without having to restate the assumption by hand.
+    """
 
     anchor: Effort
     point_s: float
     low_s: float
     high_s: float
+    effort_scale_bounds: tuple[float, float]
 
 
 def point_prediction(anchor: Effort, target_km: float = HALF_MARATHON_KM) -> float:
@@ -106,9 +112,46 @@ def predict_with_uncertainty(
         point_s=point_prediction(anchor, target_km),
         low_s=float(np.quantile(samples, low_q)),
         high_s=float(np.quantile(samples, high_q)),
+        effort_scale_bounds=(scale_low, scale_high),
     )
 
 
 def combined_range(ranges: list[PredictionRange]) -> tuple[float, float]:
     """A single honest overall range: the union of the anchor intervals."""
     return min(r.low_s for r in ranges), max(r.high_s for r in ranges)
+
+
+def intersection_range(ranges: list[PredictionRange]) -> tuple[float, float]:
+    """The window where every supplied anchor interval agrees.
+
+    Raises ValueError if the intervals do not all overlap, since an empty
+    intersection has no honest reading as a prediction range.
+    """
+    low = max(prediction.low_s for prediction in ranges)
+    high = min(prediction.high_s for prediction in ranges)
+    if low > high:
+        raise ValueError("Anchor intervals do not overlap, so there is no intersection")
+    return low, high
+
+
+def ranges_closest_to_target(
+    ranges: list[PredictionRange],
+    count: int,
+    target_km: float = HALF_MARATHON_KM,
+) -> list[PredictionRange]:
+    """The `count` anchors whose own distance sits nearest the target distance.
+
+    Riegel extrapolation is most reliable over short distance ratios, so
+    proximity to the target is the criterion for which anchors to trust.
+    """
+    if count > len(ranges):
+        raise ValueError(f"Asked for {count} anchors but only {len(ranges)} supplied")
+    by_proximity = sorted(
+        ranges, key=lambda prediction: abs(prediction.anchor.distance_km - target_km)
+    )
+    return by_proximity[:count]
+
+
+def shortest_anchor_range(ranges: list[PredictionRange]) -> PredictionRange:
+    """The anchor over the shortest distance, which is the near-maximal effort."""
+    return min(ranges, key=lambda prediction: prediction.anchor.distance_km)
