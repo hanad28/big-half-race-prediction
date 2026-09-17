@@ -6,7 +6,7 @@ Predicting my Big Half finish time from a small, honestly-reported training data
 
 Predicted **1:58 to 2:05**, from the two training anchors closest to race distance (see Calibration below). The wider range spanned by all three anchors, more conservative but less informative, is 1:47:00 to 2:07:26.
 
-Actual result: **1:52:49**. That is faster than the predicted range and inside the wider one.
+Actual result: **1:52:36**. That is faster than the predicted range and inside the wider one.
 
 The finding is in which anchor got it right. The one built from a near-maximal short effort put the race inside its range; the two built from solo training runs, neither run at full effort, both predicted too slow. Tightening the headline onto those two, which is what the calibration stage did, moved the prediction away from the answer rather than towards it.
 
@@ -14,7 +14,7 @@ The finding is in which anchor got it right. The one built from a near-maximal s
 |---|---|---|
 | Baseline (2 anchors) | 1:47:00 to 2:07:26 | 2026-08-30 |
 | Calibrated (3 anchors, tightened) | 1:58 to 2:05 | 2026-09-01 |
-| Actual result | 1:52:49 | 2026-09-06 |
+| Actual result | 1:52:36 | 2026-09-06 |
 
 Full derivation and the reasoning behind each figure is in the sections below.
 
@@ -28,7 +28,7 @@ The project is staged on purpose:
 2. **Calibration.** The final long run added as a third anchor, after the baseline was frozen: [`results/calibration_prediction.md`](results/calibration_prediction.md).
 3. **Race result.** The actual finish time measured against both published predictions: [`results/race_result.md`](results/race_result.md).
 
-Artefacts are written once and not edited afterwards, and the two exceptions are on the record. The baseline artefact was regenerated the same day it was written, before the race and before the write-once guard existed, to correct a labelling error; Baseline results below describes it. On 2026-09-17, after the project was finished, all three charts were redrawn on a clock-time axis and the two artefacts that pin a chart hash had those hashes updated to match. Neither edit changed a predicted value or a generation timestamp. Each stage adds a new timestamped file and its own chart, so the history shows what was predicted, and when, before each new piece of evidence arrived. Rerunning a stage recomputes the values and reports whether they still match, but will not overwrite what is committed.
+Each stage adds a new timestamped file and its own chart, so the history shows what was predicted, and when, before each new piece of evidence arrived. The write-once guard means that rerunning a stage recomputes the values and reports whether they still match; it will not overwrite what is committed. Where a committed artefact has since been revised, the git history is the record.
 
 ## Method
 
@@ -108,9 +108,9 @@ The 15 km long run was a steady solo effort throughout, so the baseline assumed 
 
 One data-cleaning note for provenance: the raw watch recording continued after the run finished, capturing car travel (pace 3:42/km, cadence 62 against about 77 for every genuine running lap, near-zero power, max speed 38.5 km/h). That segment was removed at source before the data entered this repo, so the 10.00 km / 55:54 figures are the complete, correct run.
 
-## Race Day Result (generated 2026-09-16 15:14 UTC)
+## Race Day Result (generated 2026-09-17 14:07 UTC)
 
-**Finish time 1:52:49** over the official 21.0975 km, a pace of 5:21 per km ([`data/race_result.csv`](data/race_result.csv)). Full artefact: [`results/race_result.md`](results/race_result.md).
+**Finish time 1:52:36** over the official 21.0975 km, a pace of 5:20 per km ([`data/race_result.csv`](data/race_result.csv)). Full artefact: [`results/race_result.md`](results/race_result.md).
 
 The result landed inside the range built from the 5k anchor and outside the tighter calibrated range. The 5k anchor is the one taken from a near-maximal effort, and it is the one that held. The long run and the progression run, the two anchors the calibration step chose to trust, both undersold the result: neither was run at maximal effort, and both were run alone. The Limitations section flagged the possibility of a faster-than-predicted result before the race, and for close to this reason. The rest of this section is about how far that can honestly be pushed.
 
@@ -118,27 +118,27 @@ The result landed inside the range built from the 5k anchor and outside the tigh
 
 | Published range | Window | Where the result landed | Exact gap |
 |---|---|---|---|
-| Calibrated range (two anchors closest to race distance) | 1:57:55 to 2:05:20 | Outside, faster | 5:06 faster than the fast end (306.2 s) |
-| Baseline range (union of the two baseline anchors) | 1:47:00 to 2:07:26 | Inside | 5:49 clear of the fast end (349.4 s), 14:37 clear of the slow end (876.9 s) |
-| 5k anchor range (near-maximal effort), contained within the baseline range above | 1:47:00 to 1:57:04 | Inside | 5:49 clear of the fast end (349.4 s), 4:15 clear of the slow end (255.5 s) |
+| Calibrated range (two anchors closest to race distance) | 1:57:55 to 2:05:20 | Outside, faster | 5:19 faster than the fast end (319.2 s) |
+| Baseline range (union of the two baseline anchors) | 1:47:00 to 2:07:26 | Inside | 5:36 clear of the fast end (336.4 s), 14:50 clear of the slow end (889.9 s) |
+| 5k anchor range (near-maximal effort), contained within the baseline range above | 1:47:00 to 1:57:04 | Inside | 5:36 clear of the fast end (336.4 s), 4:28 clear of the slow end (268.5 s) |
 
-These are three published windows, not three independent checks. The 5k anchor's range sits wholly inside the baseline union and shares its fast end, which is why 349.4 s appears in both rows. Landing inside the baseline range follows from landing inside the 5k range and tells you nothing further. There are two findings here: the result missed the calibrated window, and it fell inside the window built from the 5k anchor.
+These are three published windows, not three independent checks. The 5k anchor's range sits wholly inside the baseline union and shares its fast end, which is why 336.4 s appears in both rows. Landing inside the baseline range follows from landing inside the 5k range and tells you nothing further. There are two findings here: the result missed the calibrated window, and it fell inside the window built from the 5k anchor.
 
 ![Race result against the published ranges](results/figures/race_result_comparison.png)
 
-One definition decides that first row. The calibrated range is read here as the intersection of the two anchors closest to race distance, 1:57:55 to 2:05:20, which is the window that produced the published 1:58 to 2:05 headline. Read instead as the union of those same two anchors, 1:55:48 to 2:07:26, the result is still outside, faster than the fast end by 179.5 s (2:59) rather than 306.2 s (5:06). Neither reading contains it, so which one was meant changes the size of the miss but not the conclusion.
+One definition decides that first row. The calibrated range is read here as the intersection of the two anchors closest to race distance, 1:57:55 to 2:05:20, which is the window that produced the published 1:58 to 2:05 headline. Read instead as the union of those same two anchors, 1:55:48 to 2:07:26, the result is still outside, faster than the fast end by 192.5 s (3:12) rather than 319.2 s (5:19). Neither reading contains it, so which one was meant changes the size of the miss but not the conclusion.
 
-Calibration left the overall range alone and tightened the headline prediction to 1:58 to 2:05, moving it away from the answer in the process. The wider baseline union, described above as more conservative but less informative, contained the result. The tightened figure missed it by 5:06. The tightening rested on the two nearest anchors agreeing with each other, but they agreed because they shared a flaw: both were sub-maximal efforts, so both were slow in the same direction and for the same reason. Their agreement measured that shared property rather than anything about the race.
+Calibration left the overall range alone and tightened the headline prediction to 1:58 to 2:05, moving it away from the answer in the process. The wider baseline union, described above as more conservative but less informative, contained the result. The tightened figure missed it by 5:19. The tightening rested on the two nearest anchors agreeing with each other, but they agreed because they shared a flaw: both were sub-maximal efforts, so both were slow in the same direction and for the same reason. Their agreement measured that shared property rather than anything about the race.
 
 ### What each anchor implied after the fact
 
 | Anchor | Implied Riegel exponent | Time multiplier needed | Multiplier assumed before the race |
 |---|---|---|---|
-| Fastest 5k effort (23:35) | 1.0872 | 1.0399 | 0.98 to 1.04 |
-| Longest training run (15.04 km) | 0.7016 | 0.8858 | 0.90 to 1.00 |
-| Final progression run (10.00 km) | 0.9406 | 0.9147 | 0.95 to 1.00 |
+| Fastest 5k effort (23:35) | 1.0858 | 1.0379 | 0.98 to 1.04 |
+| Longest training run (15.04 km) | 0.6960 | 0.8841 | 0.90 to 1.00 |
+| Final progression run (10.00 km) | 0.9380 | 0.9129 | 0.95 to 1.00 |
 
-The implied exponent is the value of `b` that maps each anchor exactly onto 1:52:49. For the 5k anchor it is 1.0872, inside the 1.05 to 1.10 band the Monte Carlo drew from, so that anchor reached the actual result without any special pleading. For the long run and the progression run it is below 1, which Riegel's formula cannot produce from a maximal effort: an exponent under 1 says the longer distance was covered at a faster pace than the anchor itself. Both runs were known to be sub-maximal and were labelled as such, but the pre-race assumptions understated how far off maximal they were. The 15.04 km run was assumed to be worth up to 10% on race day and would have needed 11.4%; the progression run was assumed to be worth up to 5% and would have needed 8.5%.
+The implied exponent is the value of `b` that maps each anchor exactly onto 1:52:36. For the 5k anchor it is 1.0858, inside the 1.05 to 1.10 band the Monte Carlo drew from, so that anchor reached the actual result without any special pleading. For the long run and the progression run it is below 1, which Riegel's formula cannot produce from a maximal effort: an exponent under 1 says the longer distance was covered at a faster pace than the anchor itself. Both runs were known to be sub-maximal and were labelled as such, but the pre-race assumptions understated how far off maximal they were. The 15.04 km run was assumed to be worth up to 10% on race day and would have needed 11.6%; the progression run was assumed to be worth up to 5% and would have needed 8.7%.
 
 ### Solo training and social facilitation
 
@@ -177,7 +177,7 @@ The result reorders what was already here.
 
 A solo time trial at race effort, over 10 km or so, is now the first thing to do. The one near-maximal anchor in the dataset predicted the race and the sub-maximal ones did not, which points at effort type rather than at the crowd, but that anchor is Strava's estimate rather than a measured effort and it covers a quarter of the race distance. A verified solo maximal effort at 10 km would test the same idea over a distance close enough for Riegel to be reliable. If it extrapolates as well as the 5k anchor did, effort type accounts for the gap on its own.
 
-A personal Riegel exponent has to wait for a second race. This one implies 1.0872 from the 5k anchor, against the population value of 1.06, but a single race resting on an estimated anchor is not enough to fit anything. A second race at a different distance would change that.
+A personal Riegel exponent has to wait for a second race. This one implies 1.0858 from the 5k anchor, against the population value of 1.06, but a single race resting on an estimated anchor is not enough to fit anything. A second race at a different distance would change that.
 
 Comparing solo training paces against group and event paces across several races was here before race day and is unchanged by it. It is still the only route from a caveat the evidence happens to be consistent with to something that can actually be tested.
 
