@@ -11,12 +11,28 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
+from matplotlib.ticker import FuncFormatter, MultipleLocator
 
 from big_half.prediction import PredictionRange
 from big_half.race_comparison import RangeComparison
 from big_half.riegel import format_hms
 
 FIGURES_DIR = Path(__file__).resolve().parents[2] / "results" / "figures"
+
+# Every figure in this project is quoted as a clock time, so the axis is
+# too. Times are plotted in seconds and the ticks are formatted, rather
+# than plotting minutes and labelling in a second unit.
+TIME_AXIS_LABEL = "Half marathon time (h:mm:ss)"
+TIME_AXIS_TICK_SECONDS = 300  # a tick every five minutes
+# Horizontal padding as a fraction of the data range, so annotations
+# that overhang the widest interval still fit inside the axes.
+RANGE_LABEL_X_MARGIN = 0.20
+
+
+def _use_clock_time_axis(axis: plt.Axes) -> None:
+    axis.xaxis.set_major_locator(MultipleLocator(TIME_AXIS_TICK_SECONDS))
+    axis.xaxis.set_major_formatter(FuncFormatter(lambda seconds, _: format_hms(seconds)))
+    axis.set_xlabel(TIME_AXIS_LABEL)
 
 BASELINE_COMPARISON_TITLE = (
     "Baseline Big Half predictions: point estimates with Monte Carlo ranges\n"
@@ -34,13 +50,13 @@ def plot_prediction_comparison(
     figure, axis = plt.subplots(figsize=(9, 4.5))
 
     for position, prediction in enumerate(ranges):
-        point_min = prediction.point_s / 60
-        low_min = prediction.low_s / 60
-        high_min = prediction.high_s / 60
         axis.errorbar(
-            [point_min],
+            [prediction.point_s],
             [position],
-            xerr=[[point_min - low_min], [high_min - point_min]],
+            xerr=[
+                [prediction.point_s - prediction.low_s],
+                [prediction.high_s - prediction.point_s],
+            ],
             fmt="o",
             capsize=6,
             markersize=8,
@@ -48,7 +64,7 @@ def plot_prediction_comparison(
         axis.annotate(
             f"{format_hms(prediction.point_s)} "
             f"({format_hms(prediction.low_s)} to {format_hms(prediction.high_s)})",
-            (point_min, position),
+            (prediction.point_s, position),
             textcoords="offset points",
             xytext=(0, 12),
             ha="center",
@@ -57,7 +73,10 @@ def plot_prediction_comparison(
     axis.set_yticks(range(len(ranges)))
     axis.set_yticklabels([prediction.anchor.label for prediction in ranges])
     axis.set_ylim(-0.5, len(ranges) - 0.5)
-    axis.set_xlabel("Predicted half marathon time (minutes)")
+    # The value labels sit above the widest interval, so leave room for the
+    # text rather than letting it run into the frame.
+    axis.margins(x=RANGE_LABEL_X_MARGIN)
+    _use_clock_time_axis(axis)
     axis.set_title(title)
     axis.grid(axis="x", alpha=0.3)
     figure.tight_layout()
@@ -113,31 +132,28 @@ def plot_result_against_ranges(
     figure, axis = plt.subplots(figsize=(9.5, 4.8))
 
     for position, comparison in enumerate(comparisons):
-        low_min = comparison.low_s / 60
-        high_min = comparison.high_s / 60
         axis.barh(
             position,
-            width=high_min - low_min,
-            left=low_min,
+            width=comparison.high_s - comparison.low_s,
+            left=comparison.low_s,
             height=RANGE_BAR_HEIGHT,
             color=_range_bar_colour(comparison),
         )
         axis.annotate(
             f"{format_hms(comparison.low_s)} to {format_hms(comparison.high_s)}",
-            ((low_min + high_min) / 2, position),
+            ((comparison.low_s + comparison.high_s) / 2, position),
             textcoords="offset points",
             xytext=(0, 14),
             ha="center",
             fontsize=9,
         )
 
-    actual_min = actual_s / 60
-    axis.axvline(actual_min, color=ACTUAL_RESULT_COLOUR, linestyle="--", linewidth=2)
+    axis.axvline(actual_s, color=ACTUAL_RESULT_COLOUR, linestyle="--", linewidth=2)
     # Pinned to the top of the axes rather than to a bar, so the label
     # stays put whichever range the result happens to fall in.
     axis.annotate(
         f"Actual {format_hms(actual_s)}",
-        (actual_min, 1.0),
+        (actual_s, 1.0),
         xycoords=("data", "axes fraction"),
         textcoords="offset points",
         xytext=(6, -14),
@@ -152,7 +168,7 @@ def plot_result_against_ranges(
     )
     axis.set_ylim(-0.6, len(comparisons) - 0.4)
     axis.invert_yaxis()
-    axis.set_xlabel("Half marathon time (minutes)")
+    _use_clock_time_axis(axis)
     axis.set_title(title)
     axis.grid(axis="x", alpha=0.3)
     axis.legend(handles=_range_legend_handles(), loc="lower right", fontsize=9)
