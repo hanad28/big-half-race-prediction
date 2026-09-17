@@ -29,7 +29,7 @@ def document(analysis) -> str:
 def test_analysis_covers_three_anchors_and_three_windows(analysis) -> None:
     assert len(analysis.calibration_ranges) == 3
     assert len(analysis.comparisons) == 3
-    assert analysis.race.moving_time_s == 6769.0
+    assert analysis.race.official_time_s == 6756.0
 
 
 def test_artefact_reports_every_published_window(document: str) -> None:
@@ -41,22 +41,22 @@ def test_artefact_reports_every_published_window(document: str) -> None:
 
 
 def test_artefact_quotes_gaps_to_a_tenth_of_a_second(document: str) -> None:
-    assert "306.2 s" in document  # faster than the calibrated window
-    assert "349.4 s / 876.9 s" in document  # inside the baseline union
-    assert "349.4 s / 255.5 s" in document  # inside the 5k anchor window
+    assert "319.2 s" in document  # faster than the calibrated window
+    assert "336.4 s / 889.9 s" in document  # inside the baseline union
+    assert "336.4 s / 268.5 s" in document  # inside the 5k anchor window
 
 
 def test_artefact_headline_leads_with_the_fast_anchor_finding(document: str) -> None:
     headline = document.split("## Headline")[1].split("##")[0]
     assert "falls inside the range belonging to the 5k anchor alone" in headline
-    assert "5:06 faster than the range" in headline
+    assert "5:19 faster than the range" in headline
 
 
 def test_artefact_records_what_each_anchor_implied(document: str) -> None:
     # Only the near-maximal 5k anchor implies an exponent Riegel can produce
-    assert "| 1.0872 | 1.0399 | 0.98 to 1.04 |" in document
-    assert "| 0.7016 | 0.8858 | 0.90 to 1.00 |" in document
-    assert "| 0.9406 | 0.9147 | 0.95 to 1.00 |" in document
+    assert "| 1.0858 | 1.0379 | 0.98 to 1.04 |" in document
+    assert "| 0.6960 | 0.8841 | 0.90 to 1.00 |" in document
+    assert "| 0.9380 | 0.9129 | 0.95 to 1.00 |" in document
 
 
 def test_write_artefact_set_pins_the_chart_it_wrote(analysis, tmp_path: Path) -> None:
