@@ -8,6 +8,8 @@ Predicted **1:58 to 2:05**, from the two training anchors closest to race distan
 
 Actual result: **1:52:49**. That is faster than the predicted range and inside the wider one.
 
+The finding is in which anchor got it right. The one built from a near-maximal short effort put the race inside its range; the two built from solo training runs, neither run at full effort, both predicted too slow. Tightening the headline onto those two, which is what the calibration stage did, moved the prediction away from the answer rather than towards it.
+
 | Stage | Figure | Date |
 |---|---|---|
 | Baseline (2 anchors) | 1:47:00 to 2:07:26 | 2026-08-30 |
@@ -26,7 +28,7 @@ The project is staged on purpose:
 2. **Calibration.** The final long run added as a third anchor, after the baseline was frozen: [`results/calibration_prediction.md`](results/calibration_prediction.md).
 3. **Race result.** The actual finish time measured against both published predictions: [`results/race_result.md`](results/race_result.md).
 
-No artefact is edited once written. Each stage adds a new timestamped file and its own chart, so the history shows what was predicted, and when, before each new piece of evidence arrived. Rerunning a stage recomputes the values and reports whether they still match, but will not overwrite what is committed.
+Artefacts are written once and not edited afterwards. The one exception is recorded under Baseline results below, where the first artefact was regenerated the same day, before the race and before the write-once guard existed, to correct a labelling error. Each stage adds a new timestamped file and its own chart, so the history shows what was predicted, and when, before each new piece of evidence arrived. Rerunning a stage recomputes the values and reports whether they still match, but will not overwrite what is committed.
 
 ## Method
 
@@ -42,12 +44,7 @@ where `t1` is a known time over distance `d1`, `t2` is the predicted time over d
 
 ### Two anchors, two answers
 
-The formula needs a known effort to extrapolate from. This dataset offers two natural anchors, and they disagree:
-
-| Anchor | What it is | Prediction (b = 1.06) |
-|---|---|---|
-| Fastest 5k effort | Strava's best-effort estimate, 23:35 | 1:48:29 |
-| Longest training run | 15.04 km in 88:58 | 2:07:22 |
+The formula needs a known effort to extrapolate from. This dataset offers two natural anchors, and they disagree. Strava's best 5k estimate of 23:35 extrapolates to 1:48:29. The longest training run, 15.04 km in 88:58, extrapolates to 2:07:22. Both use b = 1.06, and both are shown with their full ranges in Baseline results below.
 
 That is a 19-minute gap, and it is not a bug. It comes from what each anchor actually measures:
 
@@ -66,16 +63,16 @@ With n = 11 there is nothing to bootstrap in the usual sense, so the uncertainty
 
 The reported range for each anchor is the 5th to 95th percentile of the simulated times. To be clear about what that is: the inputs are subjective uniform bounds on the assumptions, so this is a Monte Carlo range under stated assumptions, not a calibrated confidence interval derived from observed sampling uncertainty. It says "if the assumptions are in these ranges, the finish time lands here", nothing stronger.
 
-## Baseline results (generated 2026-08-30 15:32 UTC)
+## Baseline results (generated 2026-08-30 16:42 UTC)
 
-Full artefact: [`results/baseline_prediction.md`](results/baseline_prediction.md). The artefact was regenerated once at 16:42 UTC the same day, pre-race, to correct the interval labelling; the values are unchanged. It has not been regenerated since, and the two later stages wrote their own artefacts rather than touching this one.
+Full artefact: [`results/baseline_prediction.md`](results/baseline_prediction.md). First generated at 15:32 UTC the same day and regenerated once at 16:42, before the race, to correct the interval labelling; the values are identical in both. It has not been regenerated since, and the two later stages wrote their own artefacts rather than touching this one.
 
 | Anchor | Point (Riegel, b = 1.06) | Monte Carlo range |
 |---|---|---|
 | Fastest 5k effort (23:35) | 1:48:29 | 1:47:00 to 1:57:04 |
 | Longest training run (15.04 km) | 2:07:22 | 1:55:48 to 2:07:26 |
 
-**Overall baseline range: 1:47:00 to 2:07:26** (union of the two anchor intervals). The overlap zone, roughly 1:56 to 1:57, is where both anchors agree and is a reasonable central expectation.
+**Overall baseline range: 1:47:00 to 2:07:26** (union of the two anchor intervals). The two anchor intervals overlap between 1:55:48 and 1:57:04.
 
 ![Baseline prediction comparison](results/figures/baseline_comparison.png)
 
@@ -103,7 +100,7 @@ The final pre-race training run arrived on 2026-08-30: a 10.00 km progression ru
 
 ### What changed, and what did not
 
-The overall range is unchanged: **1:47:00 to 2:07:26**, still the union of the anchor intervals, because the new anchor's interval sits entirely inside the baseline's overall range. What the third anchor adds is agreement in the middle. Its range (1:57:55 to 2:05:20) sits entirely within the long-run anchor's and starts just above where the 5k anchor's ends, so the two anchors closest to race distance now agree on roughly 1:58 to 2:05. The baseline's central expectation of "roughly 1:56 to 1:57" was set by where its only two anchors overlapped; the new anchor, closer to race distance than the 5k and harder-run than the 15 km, pulls that central expectation towards the low 2:00s.
+The overall range is unchanged: **1:47:00 to 2:07:26**, still the union of the anchor intervals, because the new anchor's interval sits entirely inside the baseline's overall range. What the third anchor adds is agreement in the middle. Its range (1:57:55 to 2:05:20) sits entirely within the long-run anchor's and starts just above where the 5k anchor's ends, so the two anchors closest to race distance now agree on roughly 1:58 to 2:05. The baseline's zone of agreement, 1:55:48 to 1:57:04, was set by where its only two anchors overlapped; the new anchor, closer to race distance than the 5k and harder-run than the 15 km, pulls the agreement towards the low 2:00s.
 
 ### Why this anchor's effort assumption differs
 
@@ -123,7 +120,9 @@ The result landed inside the range built from the 5k anchor and outside the tigh
 |---|---|---|---|
 | Calibrated range (two anchors closest to race distance) | 1:57:55 to 2:05:20 | Outside, faster | 5:06 faster than the fast end (306.2 s) |
 | Baseline range (union of the two baseline anchors) | 1:47:00 to 2:07:26 | Inside | 5:49 clear of the fast end (349.4 s), 14:37 clear of the slow end (876.9 s) |
-| 5k anchor range (near-maximal effort) | 1:47:00 to 1:57:04 | Inside | 5:49 clear of the fast end (349.4 s), 4:15 clear of the slow end (255.5 s) |
+| 5k anchor range (near-maximal effort), contained within the baseline range above | 1:47:00 to 1:57:04 | Inside | 5:49 clear of the fast end (349.4 s), 4:15 clear of the slow end (255.5 s) |
+
+These are three published windows, not three independent checks. The 5k anchor's range sits wholly inside the baseline union and shares its fast end, which is why 349.4 s appears in both rows. Landing inside the baseline range follows from landing inside the 5k range and tells you nothing further. There are two findings here: the result missed the calibrated window, and it fell inside the window built from the 5k anchor.
 
 ![Race result against the published ranges](results/figures/race_result_comparison.png)
 
@@ -143,11 +142,17 @@ The implied exponent is the value of `b` that maps each anchor exactly onto 1:52
 
 ### Solo training and social facilitation
 
-The Limitations section below was written before the race and says every run in the dataset was solo, that race day brings crowds and pacing off strangers, and that a faster-than-predicted result would be consistent with social facilitation (Triplett, 1898; Zajonc, 1965) rather than proof of it. The result did come in faster than the calibrated prediction, and the anchors that missed are the two sub-maximal solo runs.
+The Limitations section below was written before the race and says every run in the dataset was solo, that race day brings crowds and pacing off strangers, and that a faster-than-predicted result would be consistent with social facilitation rather than proof of it. The result did come in faster than the calibrated prediction, and the anchors that missed are the two sub-maximal solo runs.
 
 The claim stays at consistent with. Riegel's formula assumes a maximal effort at both ends, and that assumption sorts the anchors the same way the result did: the race was a maximal effort and the 5k was close to one, while the long run and the progression run were not, and those two are the ones that missed. Other runners are one thing that separates a race from a training run, but so are the taper, the fuelling, the pacing discipline and the willingness to hurt, and none of those needs a crowd to happen.
 
-The 5k anchor was also run alone, which matters more than it first appears. The line between the anchors that worked and the anchors that did not follows effort type, not whether anyone else was on the road. That does not rule out a social-facilitation contribution on top, since the race could have been slower run solo and still landed inside the 5k anchor's range, but nothing here counts as evidence for one. Nor does it help that the anchor which held is the least verified input in the project, Strava's 23:35 estimate rather than a measured time trial. One race cannot pull apart explanations that all fit it, and Future Work says what would.
+The 5k anchor was also run alone, which matters more than it first appears. The line between the anchors that worked and the anchors that did not follows effort type, not whether anyone else was on the road. That does not rule out a social-facilitation contribution on top, since the race could have been slower run solo and still landed inside the 5k anchor's range, but nothing here counts as evidence for one.
+
+The pre-race caveat also leaned on this literature more confidently than it deserves. Zajonc (1965) is not a general finding that an audience makes people faster. His drive theory holds that the presence of others raises arousal, which strengthens whichever response is already dominant, so it helps well-learned tasks and hinders ones still being learned. A first half marathon, off eleven logged runs and with no prior race at the distance, is not a well-learned task. On Zajonc's own account the prediction for this runner is ambiguous and could point either way, so citing him in support of a faster time reads the theory more loosely than it will bear.
+
+Triplett (1898) is the founding experiment rather than solid evidence. Strube (2005) reanalysed the original data and found the effect small, with most between-group comparisons not reaching significance, and Stroebe (2012) argues the study has been widely misdescribed and its evidence overstated. The term social facilitation came later, from Allport (1924).
+
+None of that rules the effect out, and the caveat was still the right thing to write before the race. It does mean the caveat rested on weaker ground than its tone implied. Nor does it help that the anchor which held is the least verified input in the project, Strava's 23:35 estimate rather than a measured time trial. One race cannot pull apart explanations that all fit it, and Future Work says what would.
 
 To regenerate:
 
@@ -157,9 +162,11 @@ python -m big_half.race_result
 
 ## Limitations
 
-Written before the race and left as written. The Race Day Result section above says which of these the outcome touched.
+Written before the race. The caveats are unchanged; one citation inside the first bullet was corrected afterwards, as recorded below.
 
-- **This prediction is a solo-training baseline.** Every run in the dataset was solo. Race day involves crowds, other runners and pacing off strangers, none of which solo training data can capture. The sports-science literature calls the performance effect of the presence of others social facilitation (Triplett, 1898; Zajonc, 1965). If the actual result comes in faster than predicted, that is consistent with this effect, not proof of it, since a single race is a single data point.
+> Citation correction, 2026-09-17: the first bullet originally read "The sports-science literature calls the performance effect of the presence of others social facilitation (Triplett, 1898; Zajonc, 1965)." That credited the naming to the wrong people and the wrong field. The term is Allport's and the literature is social psychology. What the outcome did and did not show is in Race Day Result above.
+
+- **This prediction is a solo-training baseline.** Every run in the dataset was solo. Race day involves crowds, other runners and pacing off strangers, none of which solo training data can capture. Social psychology calls the performance effect of the presence of others social facilitation, a term Allport (1924) coined for the effect Triplett (1898) first tried to demonstrate and Zajonc (1965) later gave a theory. If the actual result comes in faster than predicted, that is consistent with this effect, not proof of it, since a single race is a single data point.
 - **The 5k anchor is an estimate, not a race.** Strava's 23:35 is extracted from within training runs. It anchors the fast end of the range but should not be treated as a verified standalone time trial.
 - **No half marathon history.** This is a first half marathon build-up, so there is no prior race at or near the target distance to calibrate against, which is exactly the situation where Riegel extrapolation is weakest.
 - **Course and conditions ignored.** The model knows nothing about the Big Half's course profile, weather on the day, or fuelling.
@@ -179,4 +186,7 @@ Comparing solo training paces against group and event paces across several races
 - Riegel, P.S. (1981) 'Athletic records and human endurance', *American Scientist*, 69(3), pp. 285-290. PMID: 7235349. Available at: https://pubmed.ncbi.nlm.nih.gov/7235349/. Note: this paper predates DOIs; it is the original peer-published source of the formula and is widely cited.
 - Vickers, A.J. and Vertosick, E.A. (2016) 'An empirical study of race times in recreational endurance runners', *BMC Sports Science, Medicine and Rehabilitation*, 8, 26. doi: 10.1186/s13102-016-0052-y.
 - Triplett, N. (1898) 'The dynamogenic factors in pacemaking and competition', *American Journal of Psychology*, 9(4), pp. 507-533. doi: 10.2307/1412188.
+- Allport, F.H. (1924) *Social Psychology*. Boston: Houghton Mifflin. The book that coined the term social facilitation.
 - Zajonc, R.B. (1965) 'Social facilitation', *Science*, 149(3681), pp. 269-274. doi: 10.1126/science.149.3681.269.
+- Strube, M.J. (2005) 'What did Triplett really find? A contemporary analysis of the first experiment in social psychology', *American Journal of Psychology*, 118(2), pp. 271-286. PMID: 15989124. Available at: https://pubmed.ncbi.nlm.nih.gov/15989124/.
+- Stroebe, W. (2012) 'The truth about Triplett (1898), but nobody seems to care', *Perspectives on Psychological Science*, 7(1), pp. 54-57. doi: 10.1177/1745691611427306.
