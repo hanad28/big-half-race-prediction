@@ -28,7 +28,7 @@ The project is staged on purpose:
 2. **Calibration.** The final long run added as a third anchor, after the baseline was frozen: [`results/calibration_prediction.md`](results/calibration_prediction.md).
 3. **Race result.** The actual finish time measured against both published predictions: [`results/race_result.md`](results/race_result.md).
 
-Artefacts are written once and not edited afterwards. The one exception is recorded under Baseline results below, where the first artefact was regenerated the same day, before the race and before the write-once guard existed, to correct a labelling error. Each stage adds a new timestamped file and its own chart, so the history shows what was predicted, and when, before each new piece of evidence arrived. Rerunning a stage recomputes the values and reports whether they still match, but will not overwrite what is committed.
+Artefacts are written once and not edited afterwards, and the two exceptions are on the record. The baseline artefact was regenerated the same day it was written, before the race and before the write-once guard existed, to correct a labelling error; Baseline results below describes it. On 2026-09-17, after the project was finished, all three charts were redrawn on a clock-time axis and the two artefacts that pin a chart hash had those hashes updated to match. Neither edit changed a predicted value or a generation timestamp. Each stage adds a new timestamped file and its own chart, so the history shows what was predicted, and when, before each new piece of evidence arrived. Rerunning a stage recomputes the values and reports whether they still match, but will not overwrite what is committed.
 
 ## Method
 
@@ -48,7 +48,7 @@ The formula needs a known effort to extrapolate from. This dataset offers two na
 
 That is a 19-minute gap, and it is not a bug. It comes from what each anchor actually measures:
 
-- The **5k anchor** is close to a maximal effort, which is what Riegel's model assumes. Extrapolating a short maximal effort out to 21.1 km asks the formula to stretch over a 4x distance ratio, and it implicitly assumes the endurance base to hold that extrapolated pace. Vickers and Vertosick (2016), in a study of 2,303 recreational runners, found the standard 1.06 exponent well calibrated up to the half marathon on average, but optimistic for runners with lower training volume, who are better described by larger exponents. With a short training history like mine, the 5k-based figure is best read as the fast end of the plausible range.
+- The **5k anchor** is close to a maximal effort, which is what Riegel's model assumes. Extrapolating a short maximal effort out to 21.1 km asks the formula to stretch over a 4x distance ratio, and it implicitly assumes the endurance base to hold that extrapolated pace. Vickers and Vertosick (2016), in a study of 2,303 recreational runners, found the standard 1.06 exponent well calibrated for races up to the half marathon, and badly optimistic beyond it: their marathon predictions came in at least ten minutes too fast for half the sample. That supports the formula at this distance, but it does not vouch for a fourfold extrapolation off a short training history, so the 5k-based figure is best read as the fast end of the plausible range.
 - The **long-run anchor** is much closer to race distance (only a 1.4x extrapolation), which makes the formula more reliable. But it was a steady solo training run, not a race effort, and Riegel's formula assumes maximal efforts at both ends. Feeding it a sub-maximal time inflates the prediction, so the 2:07 figure is best read as the slow end.
 
 The truth plausibly sits between the two, and the honest output is a range, not a midpoint. A third anchor, the final progression run, is added in Calibration below, after this baseline was frozen.
@@ -57,7 +57,7 @@ The truth plausibly sits between the two, and the honest output is a range, not 
 
 With n = 11 there is nothing to bootstrap in the usual sense, so the uncertainty comes from a Monte Carlo simulation over the assumptions themselves (20,000 draws per anchor):
 
-- **Exponent:** drawn uniformly from 1.05 to 1.10, spanning Riegel's fitted 1.06 and the higher values Vickers and Vertosick (2016) found for recreational runners.
+- **Exponent:** drawn uniformly from 1.05 to 1.10. Riegel's fitted value is 1.06; the room above it is a hedge against a first-time half marathoner degrading faster than a population average, not a figure taken from any source.
 - **5k anchor time:** scaled by 0.98 to 1.04, because Strava's estimate is a best-effort extraction from within training runs, not a standalone time trial.
 - **Long-run effort:** scaled by 0.90 to 1.00, reflecting that a race effort over 15 km would plausibly be up to 10% faster than the logged steady training time.
 

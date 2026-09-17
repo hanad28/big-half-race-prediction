@@ -40,6 +40,6 @@ Gaps for windows containing the result are quoted as distance from the fast end,
 
 The implied exponent is the Riegel exponent that maps each anchor exactly onto the actual time. The time multiplier is what the anchor's logged time would have to be scaled by, at the standard b = 1.06 exponent, to land on the actual time over 21.0975 km. It is directly comparable with the multiplier assumed before the race, in the last column.
 
-Chart SHA-256: daac8ae2595c923bf2a4c9888d43db51a43510876fe5dd19ab069bb88ee1086e
+Chart SHA-256: 06c2891fc9b0f3476bc438ddaedf05260ea5d0c7c5f239c68af4c2bf910fce3b
 
 See the README Race Day Result section for what this means and how it relates to the pre-registered limitations.

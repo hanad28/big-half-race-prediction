@@ -12,6 +12,6 @@ Predictions for the half marathon distance (21.0975 km), adding the final pre-ra
 
 Overall calibration range: **1:47:00 to 2:07:26** (union of the three anchor intervals).
 
-Chart SHA-256: 2467ffbbb2568f31300a2e5a3bf254bdacc0bed81988c2ee2d8151d43e9c049d
+Chart SHA-256: 0f797755678e09729e361f8e3e3beae0cfb86795fbbebf4412bb8c53486e3fb7
 
 See the README Calibration section for how this compares with the baseline and why the progression anchor's effort-scale assumption differs from the 15 km anchor's.
