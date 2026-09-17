@@ -30,22 +30,24 @@ class Effort:
 class RaceResult:
     """The actual race outcome, as logged and cleaned.
 
-    Two distances are kept deliberately. The predictions were made for the
-    official race distance, so that is what any comparison must use; the
-    GPS distance is retained only to document the discrepancy between them.
+    Both the official figures and the watch's own are kept. The predictions
+    were made for the official distance, so the official time and distance
+    are what any comparison uses; the GPS distance and the watch times are
+    retained to document how far they differ.
     """
 
     name: str
     date: str
     official_distance_km: float
     gps_distance_km: float
+    official_time_s: float
     moving_time_s: float
     elapsed_time_s: float
 
     @property
     def pace_s_per_km(self) -> float:
         """Race pace over the official distance, which is what was predicted."""
-        return self.moving_time_s / self.official_distance_km
+        return self.official_time_s / self.official_distance_km
 
     @property
     def gps_distance_excess_km(self) -> float:
@@ -89,9 +91,10 @@ def final_progression_run_effort(csv_path: Path = FINAL_RUN_CSV_PATH) -> Effort:
 def load_race_result(csv_path: Path = RACE_RESULT_CSV_PATH) -> RaceResult:
     """Load the single actual race result.
 
-    Moving time is the figure comparable with the published predictions:
-    those predicted a time for the official distance, and the race had no
-    meaningful stops, so moving and elapsed time differ by seconds.
+    The organisers' official time is the figure compared against the
+    published predictions, since those predicted a finish time over the
+    official distance. The watch's own moving and elapsed times are loaded
+    alongside it and differ by a few seconds either way.
     """
     results = pd.read_csv(csv_path, parse_dates=["date"])
     if len(results) != 1:
@@ -104,6 +107,7 @@ def load_race_result(csv_path: Path = RACE_RESULT_CSV_PATH) -> RaceResult:
         date=str(race["date"].date()),
         official_distance_km=float(race["official_distance_km"]),
         gps_distance_km=float(race["gps_distance_km"]),
+        official_time_s=float(race["official_time_s"]),
         moving_time_s=float(race["moving_time_s"]),
         elapsed_time_s=float(race["elapsed_time_s"]),
     )

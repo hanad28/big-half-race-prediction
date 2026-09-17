@@ -61,7 +61,7 @@ def analyse_race_result() -> RaceResultAnalysis:
     race = load_race_result()
     calibration_ranges = build_calibration_predictions()
     comparisons = build_range_comparisons(
-        build_predictions(), calibration_ranges, race.moving_time_s
+        build_predictions(), calibration_ranges, race.official_time_s
     )
     return RaceResultAnalysis(race, calibration_ranges, comparisons)
 
@@ -90,9 +90,11 @@ def _race_figure_rows(race: RaceResult) -> list[str]:
     return [
         "| Figure | Value |",
         "|---|---|",
-        f"| Finish time (moving) | {format_hms(race.moving_time_s)} "
+        f"| Official finish time | {format_hms(race.official_time_s)} "
+        f"({race.official_time_s:.0f} s) |",
+        f"| Watch moving time | {format_hms(race.moving_time_s)} "
         f"({race.moving_time_s:.0f} s) |",
-        f"| Elapsed time | {format_hms(race.elapsed_time_s)} "
+        f"| Watch elapsed time | {format_hms(race.elapsed_time_s)} "
         f"({race.elapsed_time_s:.0f} s) |",
         f"| Official distance | {race.official_distance_km} km |",
         f"| GPS distance | {race.gps_distance_km} km "
@@ -146,7 +148,7 @@ def render_artefact(
         f"{TIMESTAMP_LINE_PREFIX}{generated_at}",
         "",
         f"The Big Half was run on {race.date} in "
-        f"{format_hms(race.moving_time_s)}, over the official distance of "
+        f"{format_hms(race.official_time_s)}, over the official distance of "
         f"{race.official_distance_km} km. This artefact measures that "
         "result against the three windows published before the race. The "
         "frozen artefacts at results/baseline_prediction.md and "
@@ -161,11 +163,12 @@ def render_artefact(
         "",
         *_race_figure_rows(race),
         "",
-        "Moving time is the figure comparable with the published "
-        "predictions, which predicted a time for the official distance. "
-        "The race had no meaningful stops, so elapsed time is "
-        f"{race.elapsed_time_s - race.moving_time_s:.0f} s longer and the "
-        "comparisons below hold for either figure. The GPS "
+        "The organisers' official time is the figure compared against the "
+        "published predictions, which predicted a finish time over the "
+        "official distance. The watch's own figures sit close to it, "
+        f"{race.moving_time_s - race.official_time_s:.0f} s and "
+        f"{race.elapsed_time_s - race.official_time_s:.0f} s slower, and "
+        "every comparison below holds for any of the three. The GPS "
         "distance overshoot is ordinary tangent-cutting error on a course "
         "with turns, and the official distance is the one used throughout.",
         "",
@@ -178,7 +181,7 @@ def render_artefact(
         "",
         "## What each anchor implied",
         "",
-        *_anchor_implication_rows(analysis.calibration_ranges, race.moving_time_s),
+        *_anchor_implication_rows(analysis.calibration_ranges, race.official_time_s),
         "",
         "The implied exponent is the Riegel exponent that maps each anchor "
         "exactly onto the actual time. The time multiplier is what the "
@@ -216,7 +219,7 @@ def write_artefact_set(
         )
     written_chart = plot_result_against_ranges(
         analysis.comparisons,
-        actual_s=analysis.race.moving_time_s,
+        actual_s=analysis.race.official_time_s,
         output_path=chart_path,
     )
     logger.info("Wrote chart to %s", written_chart)

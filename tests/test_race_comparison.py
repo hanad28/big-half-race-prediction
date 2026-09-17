@@ -29,6 +29,7 @@ def test_load_race_result_reads_the_single_race() -> None:
     race = load_race_result()
     assert race.official_distance_km == 21.0975
     assert race.gps_distance_km == 21.3565
+    assert race.official_time_s == 6756.0
     assert race.moving_time_s == 6769.0
     assert race.elapsed_time_s == 6778.0
     assert race.name == "BIG HALF"
@@ -37,8 +38,8 @@ def test_load_race_result_reads_the_single_race() -> None:
 
 def test_race_result_derived_figures() -> None:
     race = load_race_result()
-    # 6769 / 21.0975 = 320.84 s/km, about 5:21/km
-    assert race.pace_s_per_km == pytest.approx(320.84, abs=0.01)
+    # 6756 / 21.0975 = 320.23 s/km, about 5:20/km
+    assert race.pace_s_per_km == pytest.approx(320.23, abs=0.01)
     assert race.gps_distance_excess_km == pytest.approx(0.259, abs=0.001)
 
 
@@ -134,7 +135,7 @@ def test_published_windows_are_reproduced_exactly() -> None:
     """The three comparison windows must match the committed artefacts."""
     race = load_race_result()
     comparisons = build_range_comparisons(
-        build_predictions(), build_calibration_predictions(), race.moving_time_s
+        build_predictions(), build_calibration_predictions(), race.official_time_s
     )
     windows = [(format_hms(c.low_s), format_hms(c.high_s)) for c in comparisons]
     assert windows == [
@@ -147,7 +148,7 @@ def test_published_windows_are_reproduced_exactly() -> None:
 def test_actual_result_lands_inside_the_fast_anchor_range_only() -> None:
     race = load_race_result()
     calibrated, baseline, fast_anchor = build_range_comparisons(
-        build_predictions(), build_calibration_predictions(), race.moving_time_s
+        build_predictions(), build_calibration_predictions(), race.official_time_s
     )
     assert not calibrated.contains_actual
     assert calibrated.miss_s > 0  # faster than the calibrated window
@@ -155,10 +156,10 @@ def test_actual_result_lands_inside_the_fast_anchor_range_only() -> None:
     assert fast_anchor.contains_actual
 
 
-def test_conclusion_holds_for_elapsed_time_as_well_as_moving_time() -> None:
-    """The 9 s moving-versus-elapsed difference must not drive the finding."""
+def test_conclusion_holds_for_every_recorded_time() -> None:
+    """The seconds between official, moving and elapsed must not drive it."""
     race = load_race_result()
-    for actual_s in (race.moving_time_s, race.elapsed_time_s):
+    for actual_s in (race.official_time_s, race.moving_time_s, race.elapsed_time_s):
         calibrated, _, fast_anchor = build_range_comparisons(
             build_predictions(), build_calibration_predictions(), actual_s
         )
@@ -168,30 +169,30 @@ def test_conclusion_holds_for_elapsed_time_as_well_as_moving_time() -> None:
 
 def test_implied_exponent_round_trips_through_riegel() -> None:
     anchor = Effort(label="5k", distance_km=5.0, time_s=1415.0)
-    actual_s = 6769.0
+    actual_s = 6756.0
     exponent = implied_riegel_exponent(anchor, actual_s)
     round_tripped = predict_time(
         anchor.distance_km, anchor.time_s, HALF_MARATHON_KM, exponent
     )
     assert round_tripped == pytest.approx(actual_s)
-    assert exponent == pytest.approx(1.0872, abs=0.0001)
+    assert exponent == pytest.approx(1.0858, abs=0.0001)
 
 
 def test_implied_exponent_below_one_for_a_submaximal_anchor() -> None:
     """A training run slower per km than the race implies an impossible exponent."""
     anchor = Effort(label="long", distance_km=15.04, time_s=88.97 * 60)
-    assert implied_riegel_exponent(anchor, 6769.0) < 1.0
+    assert implied_riegel_exponent(anchor, 6756.0) < 1.0
 
 
 def test_implied_exponent_needs_two_distances() -> None:
-    anchor = Effort(label="half", distance_km=HALF_MARATHON_KM, time_s=6769.0)
+    anchor = Effort(label="half", distance_km=HALF_MARATHON_KM, time_s=6756.0)
     with pytest.raises(ValueError):
-        implied_riegel_exponent(anchor, 6769.0)
+        implied_riegel_exponent(anchor, 6756.0)
 
 
 def test_required_effort_scale_lands_on_the_actual_time() -> None:
     anchor = Effort(label="long", distance_km=15.04, time_s=88.97 * 60)
     prediction = predict_with_uncertainty(anchor, is_maximal_effort=False)
-    scale = required_effort_scale(prediction, actual_s=6769.0)
-    assert prediction.point_s * scale == pytest.approx(6769.0)
+    scale = required_effort_scale(prediction, actual_s=6756.0)
+    assert prediction.point_s * scale == pytest.approx(6756.0)
     assert scale < 0.90  # more generous than the effort assumption allowed for
